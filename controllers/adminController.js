@@ -256,7 +256,7 @@ const updatePlan = async (req, res) => {
         const updatedPlan = planResult.rows[0];
         const syncResult = await db.query(
             `UPDATE api_keys
-             SET daily_limit = $1, updated_at = CURRENT_TIMESTAMP
+             SET daily_limit = $1
              WHERE user_id IN (SELECT id FROM users WHERE plan = $2)`,
             [updatedPlan.daily_limit, updatedPlan.code]
         );

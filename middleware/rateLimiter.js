@@ -23,17 +23,6 @@ function getStartOfPeriod(type) {
 async function memGet(key, apiKey, type, userId) {
     const entry = memoryStore.get(key);
     if (!entry || Date.now() > entry.expiresAt) {
-        if (userId && type) {
-            try {
-                const res = await db.query(
-                    `SELECT COUNT(*) FROM api_logs WHERE user_id = $1 AND created_at >= $2`,
-                    [userId, getStartOfPeriod(type)]
-                );
-                const count = parseInt(res.rows[0].count) || 0;
-                memoryStore.set(key, { count, expiresAt: Date.now() + 60000 });
-                return count;
-            } catch (e) { return 0; }
-        }
         return 0;
     }
     return entry.count;
@@ -42,17 +31,6 @@ async function memGet(key, apiKey, type, userId) {
 async function memIncr(key, ttlSeconds, apiKey, type, userId) {
     let entry = memoryStore.get(key);
     if (!entry || Date.now() > entry.expiresAt) {
-        if (userId && type) {
-            try {
-                const res = await db.query(
-                    `SELECT COUNT(*) FROM api_logs WHERE user_id = $1 AND created_at >= $2`,
-                    [userId, getStartOfPeriod(type)]
-                );
-                const count = parseInt(res.rows[0].count) || 0;
-                memoryStore.set(key, { count: count + 1, expiresAt: Date.now() + ttlSeconds * 1000 });
-                return count + 1;
-            } catch (e) { }
-        }
         memoryStore.set(key, { count: 1, expiresAt: Date.now() + ttlSeconds * 1000 });
         return 1;
     }

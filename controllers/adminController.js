@@ -287,7 +287,7 @@ const createPlan = async (req, res) => {
         if (err.code === '23505') {
             return res.status(409).json({ status: 'error', message: 'A plan with this code already exists.' });
         }
-        res.status(500).json({ status: 'error', message: 'Failed to create plan.' });
+        res.status(500).json({ status: 'error', message: 'Failed to create plan: ' + err.message });
     }
 };
 

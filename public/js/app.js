@@ -389,6 +389,10 @@ async function handleRegister(e) {
     btn.disabled = true;
 
     try {
+        const email = document.getElementById('regEmail').value;
+        const password = document.getElementById('regPassword').value;
+        const fullName = document.getElementById('regName').value;
+
         const res = await fetch('/api/auth/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

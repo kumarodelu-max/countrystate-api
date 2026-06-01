@@ -14,8 +14,11 @@ router.get('/users/:userId/logs',       adminController.getUserLogs);
 router.put('/users/:userId/limit',      adminController.updateUserLimit);
 router.post('/users/:userId/promos',    adminController.createPromo);
 
+router.delete('/users/:userId',         adminController.deleteUser);
+
 router.get('/plans',               adminController.getPlans);
 router.post('/plans',              adminController.createPlan);
 router.put('/plans/:planId',       adminController.updatePlan);
+router.delete('/plans/:planId',    adminController.deletePlan);
 
 module.exports = router;

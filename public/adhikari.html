@@ -368,6 +368,18 @@
     </div>
 </div>
 
+<!-- DELETE CONFIRMATION -->
+<div class="modal" id="deleteConfirmModal">
+    <div class="modal-box" style="max-width: 400px; text-align: center;">
+        <h2 style="color: #ef4444; margin-top: 0;">⚠️ Confirm Deletion</h2>
+        <p style="color: #475569; font-size: 0.9rem;" id="deleteConfirmMessage">Are you sure you want to delete this?</p>
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+            <button type="button" class="btn-outline-sm" style="flex: 1; padding: 0.75rem; border-color: #ef4444; color: #ef4444;" onclick="closeModal('deleteConfirmModal')">Cancel</button>
+            <button type="button" class="btn-sm" style="flex: 1; padding: 0.75rem; background: #ef4444;" id="confirmDeleteBtn">Yes, Delete</button>
+        </div>
+    </div>
+</div>
+
 <!-- USER USAGE HISTORY MODAL -->
 <div class="modal" id="logsModal" style="padding:1rem;">
     <div class="modal-box" style="max-width:720px; width:100%;">

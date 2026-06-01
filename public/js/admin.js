@@ -129,6 +129,7 @@ function renderUsers(users) {
             <td>
                 <button class="btn-outline-sm" onclick="openLogsModal('${u.id}')">History</button>
                 <button class="btn-outline-sm" onclick="openEditModal('${u.id}','${plan}',${lim},${u.user_active},'${u.role}')">Edit</button>
+                <button class="btn-outline-sm" style="border-color:#ef4444; color:#ef4444;" onclick="confirmDelete('user', '${u.id}', '${escHtml(u.email)}')">Delete</button>
             </td>
         </tr>`;
     }).join('');
@@ -314,7 +315,10 @@ function renderPlans(plans) {
             <td style="color:#16a34a;">${parseFloat(p.price_monthly) === 0 ? 'Free' : '$' + parseFloat(p.price_monthly).toFixed(2)}</td>
             <td style="color:#475569;">${parseFloat(p.price_yearly) === 0 ? '–' : '$' + parseFloat(p.price_yearly).toFixed(2)}</td>
             <td><span class="badge ${p.is_active ? 'active' : 'inactive'}">${p.is_active ? 'Active' : 'Disabled'}</span></td>
-            <td><button class="btn-outline-sm" onclick="openPlanModal('${p.id}')">Edit</button></td>
+            <td>
+                <button class="btn-outline-sm" onclick="openPlanModal('${p.id}')">Edit</button>
+                <button class="btn-outline-sm" style="border-color:#ef4444; color:#ef4444; margin-left:0.25rem;" onclick="confirmDelete('plan', '${p.id}', '${escHtml(p.name)}')">Delete</button>
+            </td>
         </tr>
     `).join('');
 }
@@ -570,3 +574,60 @@ function renderLogsPagination({ page, totalPages }) {
     
     container.innerHTML = html;
 }
+
+// ═══════════════════════════════════════════════════════
+//  DELETE CONFIRMATION
+// ═══════════════════════════════════════════════════════
+let deleteTargetType = null;
+let deleteTargetId = null;
+
+function confirmDelete(type, id, name) {
+    deleteTargetType = type;
+    deleteTargetId = id;
+    
+    const msg = document.getElementById('deleteConfirmMessage');
+    if (type === 'user') {
+        msg.innerHTML = `Are you sure you want to delete user <strong>${name}</strong>? This cannot be undone.`;
+    } else if (type === 'plan') {
+        msg.innerHTML = `Are you sure you want to delete the plan <strong>${name}</strong>?`;
+    }
+    
+    const btn = document.getElementById('confirmDeleteBtn');
+    btn.onclick = executeDelete;
+    btn.textContent = 'Yes, Delete';
+    btn.disabled = false;
+    
+    openModal('deleteConfirmModal');
+}
+
+async function executeDelete() {
+    if (!deleteTargetType || !deleteTargetId) return;
+    
+    const btn = document.getElementById('confirmDeleteBtn');
+    btn.textContent = 'Deleting...';
+    btn.disabled = true;
+    
+    const url = deleteTargetType === 'user' 
+        ? `/api/admin/users/${deleteTargetId}` 
+        : `/api/admin/plans/${deleteTargetId}`;
+        
+    try {
+        const res = await fetch(url, { method: 'DELETE', headers: authHeaders });
+        const data = await res.json();
+        
+        if (res.ok && data.status === 'success') {
+            closeModal('deleteConfirmModal');
+            if (deleteTargetType === 'user') fetchUsers();
+            if (deleteTargetType === 'plan') fetchPlans();
+        } else {
+            alert('Failed to delete: ' + (data.message || 'Unknown error'));
+            btn.textContent = 'Yes, Delete';
+            btn.disabled = false;
+        }
+    } catch (err) {
+        alert('Network error during deletion.');
+        btn.textContent = 'Yes, Delete';
+        btn.disabled = false;
+    }
+}
+

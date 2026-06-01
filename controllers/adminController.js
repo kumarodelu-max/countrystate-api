@@ -179,7 +179,24 @@ const updateUserLimit = async (req, res) => {
     } catch (err) {
         await db.query('ROLLBACK');
         console.error('[Admin] updateUserLimit error:', err);
-        res.status(500).json({ status: 'error', message: 'Failed to update user.' });
+        res.status(500).json({ status: 'error', message: 'Failed to update user limit.' });
+    }
+};
+
+// ─────────────────────────────────────────────────────
+// DELETE /api/admin/users/:userId
+// ─────────────────────────────────────────────────────
+const deleteUser = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const result = await db.query('DELETE FROM users WHERE id = $1 RETURNING id', [userId]);
+        if (result.rowCount === 0) {
+            return res.status(404).json({ status: 'error', message: 'User not found.' });
+        }
+        res.json({ status: 'success', message: 'User deleted successfully.' });
+    } catch (err) {
+        console.error('[Admin] deleteUser error:', err);
+        res.status(500).json({ status: 'error', message: 'Failed to delete user.' });
     }
 };
 
@@ -338,6 +355,6 @@ const getUserLogs = async (req, res) => {
 };
 
 module.exports = {
-    getUsers, createUser, updateUserLimit, createPromo,
-    getPlans, createPlan, updatePlan, getUserLogs
+    getUsers, createUser, updateUserLimit, createPromo, deleteUser,
+    getPlans, createPlan, updatePlan, deletePlan, getUserLogs
 };

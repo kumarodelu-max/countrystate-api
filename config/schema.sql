@@ -17,6 +17,11 @@ CREATE TABLE IF NOT EXISTS users (
     currency        CHAR(3) DEFAULT 'USD', -- 'INR' or 'USD'
     plan            VARCHAR(20) DEFAULT 'free' CHECK (plan IN ('free', 'starter', 'pro', 'enterprise')),
     is_active       BOOLEAN DEFAULT TRUE,
+    role            VARCHAR(20) DEFAULT 'user',
+    verification_token VARCHAR(255),
+    is_verified     BOOLEAN DEFAULT FALSE,
+    reset_token     VARCHAR(255),
+    reset_expires   TIMESTAMPTZ,
     created_at      TIMESTAMPTZ DEFAULT NOW(),
     updated_at      TIMESTAMPTZ DEFAULT NOW()
 );

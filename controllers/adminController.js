@@ -308,6 +308,23 @@ const createPlan = async (req, res) => {
     }
 };
 
+// ─────────────────────────────────────────────────────
+// DELETE /api/admin/plans/:planId
+// ─────────────────────────────────────────────────────
+const deletePlan = async (req, res) => {
+    try {
+        const { planId } = req.params;
+        const result = await db.query('DELETE FROM plans WHERE id = $1 RETURNING id', [planId]);
+        if (result.rowCount === 0) {
+            return res.status(404).json({ status: 'error', message: 'Plan not found.' });
+        }
+        res.json({ status: 'success', message: 'Plan deleted successfully.' });
+    } catch (err) {
+        console.error('[Admin] deletePlan error:', err);
+        res.status(500).json({ status: 'error', message: 'Failed to delete plan.' });
+    }
+};
+
 // GET /api/admin/users/:userId/logs?period=7d|30d|90d|365d|all&page=1
 const getUserLogs = async (req, res) => {
     const { userId } = req.params;

@@ -269,8 +269,8 @@ const getUsage = async (req, res) => {
 
     try {
         const [dayCount, monthCount, statsResult, planResult] = await Promise.all([
-            getCount(todayKey, apiKey, 'day'),
-            getCount(monthKey, apiKey, 'month'),
+            getCount(todayKey, apiKey, 'day', req.userId),
+            getCount(monthKey, apiKey, 'month', req.userId),
             db.query(
                 `SELECT COALESCE(AVG(latency_ms), 0) as avg_latency,
                         SUM(CASE WHEN status_code >= 400 THEN 1 ELSE 0 END) as error_count

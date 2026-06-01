@@ -20,14 +20,14 @@ function getStartOfPeriod(type) {
     return new Date(now.toISOString().slice(0, 7) + '-01').toISOString();
 }
 
-async function memGet(key, apiKey, type) {
+async function memGet(key, apiKey, type, userId) {
     const entry = memoryStore.get(key);
     if (!entry || Date.now() > entry.expiresAt) {
-        if (apiKey && type) {
+        if (userId && type) {
             try {
                 const res = await db.query(
-                    `SELECT COUNT(*) FROM api_logs WHERE api_key = $1 AND created_at >= $2`,
-                    [apiKey, getStartOfPeriod(type)]
+                    `SELECT COUNT(*) FROM api_logs WHERE user_id = $1 AND created_at >= $2`,
+                    [userId, getStartOfPeriod(type)]
                 );
                 const count = parseInt(res.rows[0].count) || 0;
                 memoryStore.set(key, { count, expiresAt: Date.now() + 60000 });
@@ -39,14 +39,14 @@ async function memGet(key, apiKey, type) {
     return entry.count;
 }
 
-async function memIncr(key, ttlSeconds, apiKey, type) {
+async function memIncr(key, ttlSeconds, apiKey, type, userId) {
     let entry = memoryStore.get(key);
     if (!entry || Date.now() > entry.expiresAt) {
-        if (apiKey && type) {
+        if (userId && type) {
             try {
                 const res = await db.query(
-                    `SELECT COUNT(*) FROM api_logs WHERE api_key = $1 AND created_at >= $2`,
-                    [apiKey, getStartOfPeriod(type)]
+                    `SELECT COUNT(*) FROM api_logs WHERE user_id = $1 AND created_at >= $2`,
+                    [userId, getStartOfPeriod(type)]
                 );
                 const count = parseInt(res.rows[0].count) || 0;
                 memoryStore.set(key, { count: count + 1, expiresAt: Date.now() + ttlSeconds * 1000 });
@@ -79,21 +79,21 @@ if (process.env.REDIS_ENABLED === 'true') {
     }
 }
 
-async function increment(key, ttlSeconds, apiKey, type) {
+async function increment(key, ttlSeconds, apiKey, type, userId) {
     if (redisClient) {
         const count = await redisClient.incr(key);
         if (count === 1) await redisClient.expire(key, ttlSeconds);
         return count;
     }
-    return memIncr(key, ttlSeconds, apiKey, type);
+    return memIncr(key, ttlSeconds, apiKey, type, userId);
 }
 
-async function getCount(key, apiKey, type) {
+async function getCount(key, apiKey, type, userId) {
     if (redisClient) {
         const val = await redisClient.get(key);
         return parseInt(val) || 0;
     }
-    return memGet(key, apiKey, type);
+    return memGet(key, apiKey, type, userId);
 }
 
 // ─── Fetch plan limits LIVE from DB ───────────────────────────
@@ -133,8 +133,8 @@ const rateLimiter = async (req, res, next) => {
         const monthlyLimit = planLimits.monthly;
 
         const [dayCount, monthCount] = await Promise.all([
-            increment(todayKey,  86400,   apiKey, 'day'),
-            increment(monthKey,  2678400, apiKey, 'month'),
+            increment(todayKey,  86400,   apiKey, 'day', req.userId),
+            increment(monthKey,  2678400, apiKey, 'month', req.userId),
         ]);
 
         // ── Daily limit check ──────────────────────────────────

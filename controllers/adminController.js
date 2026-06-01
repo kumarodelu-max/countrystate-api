@@ -49,7 +49,7 @@ const getUsers = async (req, res) => {
         });
     } catch (err) {
         console.error('[Admin] getUsers error:', err);
-        res.status(500).json({ status: 'error', message: 'Failed to fetch users.' });
+        res.status(500).json({ status: 'error', message: 'Failed to fetch users: ' + err.message });
     }
 };
 
@@ -227,7 +227,7 @@ const getPlans = async (req, res) => {
         const result = await db.query('SELECT * FROM plans ORDER BY price_monthly ASC');
         res.json({ status: 'success', data: result.rows });
     } catch (err) {
-        res.status(500).json({ status: 'error', message: 'Failed to fetch plans.' });
+        res.status(500).json({ status: 'error', message: 'Failed to fetch plans: ' + err.message });
     }
 };
 

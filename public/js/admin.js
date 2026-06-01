@@ -323,7 +323,7 @@ function renderPlans(plans) {
 //  EDIT PLAN
 // ═══════════════════════════════════════════════════════
 function openPlanModal(planId) {
-    const p = allPlans.find(x => x.id === planId);
+    const p = allPlans.find(x => x.id == planId);
     if (!p) return;
     document.getElementById('edit-plan-id').value      = p.id;
     document.getElementById('edit-plan-daily').value   = p.daily_limit;

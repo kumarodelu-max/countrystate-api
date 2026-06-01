@@ -116,3 +116,62 @@ CREATE INDEX IF NOT EXISTS idx_cities_country_code ON cities(country_code);
 CREATE INDEX IF NOT EXISTS idx_translations_entity ON translations(entity_type, entity_id, locale);
 CREATE INDEX IF NOT EXISTS idx_api_keys_value     ON api_keys(key_value);
 CREATE INDEX IF NOT EXISTS idx_api_keys_user      ON api_keys(user_id);
+
+-- ============================================================
+-- PLANS TABLE
+-- ============================================================
+CREATE TABLE IF NOT EXISTS plans (
+    id              SERIAL PRIMARY KEY,
+    code            VARCHAR(50) UNIQUE NOT NULL,
+    name            VARCHAR(100) NOT NULL,
+    daily_limit     INT NOT NULL DEFAULT 100,
+    monthly_limit   INT NOT NULL DEFAULT 0,
+    price_monthly   DECIMAL(10, 2) DEFAULT 0.00,
+    price_yearly    DECIMAL(10, 2) DEFAULT 0.00,
+    is_active       BOOLEAN DEFAULT TRUE,
+    created_at      TIMESTAMPTZ DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================
+-- PLAN HISTORY TABLE
+-- ============================================================
+CREATE TABLE IF NOT EXISTS plan_history (
+    id                  SERIAL PRIMARY KEY,
+    user_id             UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    old_plan            VARCHAR(50),
+    new_plan            VARCHAR(50),
+    old_limit           INT,
+    new_limit           INT,
+    source              VARCHAR(50) DEFAULT 'admin_manual',
+    changed_by_admin_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    created_at          TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================
+-- USER PROMOS TABLE
+-- ============================================================
+CREATE TABLE IF NOT EXISTS user_promos (
+    id              SERIAL PRIMARY KEY,
+    user_id         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    message         TEXT NOT NULL,
+    type            VARCHAR(50) DEFAULT 'promo',
+    is_active       BOOLEAN DEFAULT TRUE,
+    created_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================
+-- API LOGS TABLE
+-- ============================================================
+CREATE TABLE IF NOT EXISTS api_logs (
+    id              BIGSERIAL PRIMARY KEY,
+    api_key         VARCHAR(64) NOT NULL,
+    endpoint        VARCHAR(255) NOT NULL,
+    method          VARCHAR(10) NOT NULL,
+    ip_address      VARCHAR(45),
+    status_code     INT,
+    response_time   INT,
+    created_at      TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_api_logs_api_key ON api_logs(api_key);
+CREATE INDEX IF NOT EXISTS idx_api_logs_created_at ON api_logs(created_at);

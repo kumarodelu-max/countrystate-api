@@ -82,12 +82,21 @@ async function checkAuth() {
             if (data.status === 'success') {
                 localStorage.setItem('cs_user', JSON.stringify(data.data));
                 window.history.replaceState({}, document.title, window.location.pathname); // clear URL
-                alert('Email verified successfully! Welcome to your dashboard.');
+                // Show temporary success banner instead of alert
+                const banner = document.createElement('div');
+                banner.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#10b981;color:white;padding:1rem 2rem;border-radius:8px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-weight:600;';
+                banner.textContent = 'Email verified successfully! Welcome to your dashboard.';
+                document.body.appendChild(banner);
+                setTimeout(() => banner.remove(), 4000);
             } else {
-                alert(data.message || 'Verification failed. Token may be expired.');
+                const banner = document.createElement('div');
+                banner.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#ef4444;color:white;padding:1rem 2rem;border-radius:8px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-weight:600;';
+                banner.textContent = data.message || 'Verification failed. Token may be expired.';
+                document.body.appendChild(banner);
+                setTimeout(() => banner.remove(), 4000);
             }
         } catch (err) {
-            alert('Network error during verification.');
+            console.error(err);
         }
     }
 
@@ -258,7 +267,18 @@ async function loadDynamicPlans(currentUserPlan) {
 function copyApiKey() {
     const key = document.getElementById('keys-tab-display').textContent;
     navigator.clipboard.writeText(key).then(() => {
-        alert('API Key copied to clipboard!');
+        const btn = event.target;
+        const originalText = btn.textContent;
+        btn.textContent = 'Copied!';
+        btn.style.background = '#10b981';
+        btn.style.color = 'white';
+        btn.style.borderColor = '#10b981';
+        setTimeout(() => {
+            btn.textContent = originalText;
+            btn.style.background = '';
+            btn.style.color = '';
+            btn.style.borderColor = '';
+        }, 2000);
     });
 }
 
@@ -406,8 +426,18 @@ async function handleRegister(e) {
 
         const data = await res.json();
         if (data.status === 'success') {
-            closeModal('registerModal');
-            alert(data.message); // Shows "Please check your email"
+            const errDiv = document.getElementById('regError');
+            errDiv.style.color = '#065f46';
+            errDiv.style.background = '#d1fae5';
+            errDiv.style.borderColor = '#a7f3d0';
+            errDiv.textContent = 'Account created successfully! Redirecting to login...';
+            errDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                closeModal('registerModal');
+                openModal('loginModal');
+                document.getElementById('loginEmail').value = email;
+            }, 2000);
         } else {
             showError('reg', data.message || 'Registration failed');
         }
@@ -498,14 +528,22 @@ async function saveSettings(isActive = true) {
             
             if (isActive) {
                 populateDashboard(updatedUser);
-                alert('Settings saved successfully!');
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = 'Saved!';
+                btn.style.background = '#10b981';
+                btn.style.borderColor = '#10b981';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '';
+                    btn.style.borderColor = '';
+                }, 2000);
             }
         } else {
-            alert(data.message || 'Failed to update settings');
+            showError('settings', data.message || 'Failed to update settings');
         }
     } catch (err) {
         console.error(err);
-        alert('Network error while saving settings.');
     }
 }
 

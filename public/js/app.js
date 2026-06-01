@@ -430,14 +430,14 @@ async function handleRegister(e) {
             errDiv.style.color = '#065f46';
             errDiv.style.background = '#d1fae5';
             errDiv.style.borderColor = '#a7f3d0';
-            errDiv.textContent = 'Account created successfully! Redirecting to login...';
+            errDiv.textContent = data.message || 'Account created successfully! Please check your email to verify.';
             errDiv.style.display = 'block';
             
             setTimeout(() => {
                 closeModal('registerModal');
                 openModal('loginModal');
                 document.getElementById('loginEmail').value = email;
-            }, 2000);
+            }, 5000);
         } else {
             showError('reg', data.message || 'Registration failed');
         }

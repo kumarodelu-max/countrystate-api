@@ -16,8 +16,9 @@ router.get('/usage', getUsage);
 router.get('/usage/history', getUsageHistory);
 
 // Rate limiter & API logger apply to all data routes below this line
-router.use(rateLimiter);
+// API logger must run BEFORE rateLimiter so that rate-limited requests (429) are still logged
 router.use(apiLogger);
+router.use(rateLimiter);
 
 // ─── Geographical Data ───────────────────────────────
 // GET /api/v1/countries

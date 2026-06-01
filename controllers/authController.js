@@ -129,7 +129,7 @@ const login = async (req, res) => {
 
     try {
         const result = await db.query(
-            'SELECT id, email, password_hash, full_name, plan, currency, role, is_active FROM users WHERE email = $1',
+            'SELECT id, email, password_hash, full_name, plan, currency, role, is_active, is_verified FROM users WHERE email = $1',
             [email.toLowerCase()]
         );
 

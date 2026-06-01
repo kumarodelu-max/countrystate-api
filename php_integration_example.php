@@ -11,7 +11,7 @@
 // 1. Configuration
 // ==========================================
 $api_base_url = 'https://countrystatecityapp.in/api/v1';
-$api_key      = 'cs_cceef13c266294f34c00d79e16999d84a09c6b374e3752418f7df740'; // Replace with an API key from your dashboard
+$api_key      = 'cs_ccc1453ebb56551ac3767838226651655daaadcb050e14c2d3fc85be'; // Replace with an API key from your dashboard
 
 // ==========================================
 // 2. Helper Function: Make API Request
@@ -64,7 +64,11 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_states') {
     }
 
     $api_response = fetchFromApi('/countries/' . $country_iso2 . '/states');
-    echo json_encode($api_response['data'] ?? []);
+    if (isset($api_response['error'])) {
+        echo json_encode(['error' => true, 'details' => $api_response['details']]);
+    } else {
+        echo json_encode($api_response['data'] ?? []);
+    }
     exit;
 }
 
@@ -80,7 +84,11 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_cities') {
     }
 
     $api_response = fetchFromApi('/countries/' . $country_iso2 . '/states/' . $state_code . '/cities');
-    echo json_encode($api_response['data'] ?? []);
+    if (isset($api_response['error'])) {
+        echo json_encode(['error' => true, 'details' => $api_response['details']]);
+    } else {
+        echo json_encode($api_response['data'] ?? []);
+    }
     exit;
 }
 

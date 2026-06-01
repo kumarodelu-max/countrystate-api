@@ -26,7 +26,9 @@ async function sendVerificationEmail(toEmail, token) {
         return;
     }
 
-    const verifyUrl = `http://localhost:${process.env.PORT || 3000}/?verify=${token}`;
+    // Determine the base URL dynamically or fallback to localhost
+    const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
+    const verifyUrl = `${baseUrl}/?verify=${token}`;
     
     const mailOptions = {
         from: `"CountryStateAPI" <${SMTP_USER}>`,

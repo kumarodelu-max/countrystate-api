@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CountryState API — Fast, Free Geographical Data</title>
+    <meta name="description" content="REST API for Countries, States, and Cities worldwide. Free tier with 100 requests/day. Premium plans available.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css?v=2.0.1">
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">🌍 CountryState<span class="text-accent">API</span></a>
+            <div class="nav-auth" id="nav-auth">
+                <button class="btn btn-outline" onclick="openModal('loginModal')">Sign In</button>
+                <button class="btn btn-primary" onclick="openModal('registerModal')">Get Free API Key</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main View (Landing Page) -->
+    <main id="view-landing" class="view active">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <div class="badge">🚀 Now live with 150,000+ cities</div>
+                <h1>The Most Accurate <br><span class="text-gradient">Geo Data API</span> for Developers</h1>
+                <p>Lightning-fast REST API for Countries, States, and Cities. Complete worldwide coverage in JSON format. Multilingual support built-in.</p>
+                <div class="hero-actions">
+                    <button class="btn btn-primary btn-large" onclick="openModal('registerModal')">Start Building for Free</button>
+                    <a href="#features" class="btn btn-outline btn-large">View Features</a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="code-window">
+                    <div class="window-header">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                        <span class="title">GET /api/v1/countries/IN/states/Tamil Nadu/cities</span>
+                    </div>
+                    <pre><code>{
+  "status": "success",
+  "count": 350,
+  "data": [
+    {
+      "id": 105658,
+      "name": "Chennai",
+      "latitude": "13.08784000",
+      "longitude": "80.27847000"
+    },
+    ...
+  ]
+}</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="features">
+            <h2>Why developers love us</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="icon">⚡</div>
+                    <h3>Blazing Fast</h3>
+                    <p>Sub-50ms response times globally. Built on modern Node.js and Redis caching infrastructure.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🌍</div>
+                    <h3>Complete Data</h3>
+                    <p>250 countries, 5,300+ states, and 150,000+ cities. Always up to date.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🗣️</div>
+                    <h3>Multilingual</h3>
+                    <p>Built-in support for translations. Request data in English, Spanish, Hindi, and more.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing Section -->
+        <section id="pricing" class="pricing">
+            <h2>Simple, transparent pricing</h2>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3>Hobby</h3>
+                    <div class="price">Free</div>
+                    <ul class="features-list">
+                        <li>✅ 100 requests / day</li>
+                        <li>✅ Up to 3,000 / month</li>
+                        <li>✅ All endpoints</li>
+                        <li>❌ No SLA</li>
+                    </ul>
+                    <button class="btn btn-primary w-100" onclick="openModal('registerModal')">Get API Key</button>
+                </div>
+                <div class="pricing-card popular">
+                    <div class="popular-badge">Most Popular</div>
+                    <h3>Pro</h3>
+                    <div class="price">₹499<span class="interval">/mo</span></div>
+                    <ul class="features-list">
+                        <li>✅ 10,000 requests / day</li>
+                        <li>✅ Unlimited monthly</li>
+                        <li>✅ Email Support</li>
+                        <li>✅ 99.9% Uptime SLA</li>
+                    </ul>
+                    <button class="btn btn-primary w-100" onclick="alert('Stripe integration coming soon!')">Upgrade to Pro</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Dashboard View (Hidden by default) -->
+    <main id="view-dashboard" class="view saas-layout">
+        <!-- SaaS Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>🌍 Developer Console</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" onclick="switchDashTab('overview')">🏠 Hub</button>
+                <button class="nav-item" onclick="switchDashTab('keys')">🔐 Credentials</button>
+                <button class="nav-item" onclick="switchDashTab('usage')">📊 Analytics</button>
+                <button class="nav-item" onclick="switchDashTab('pricing')">💎 Subscription</button>
+                <button class="nav-item" onclick="switchDashTab('docs')">📖 Developer Guide</button>
+                <button class="nav-item" onclick="alert('Support portal coming soon!')">💬 Help Center</button>
+                <button class="nav-item" onclick="switchDashTab('settings')">⚙️ Preferences</button>
+                <button class="nav-item" id="nav-adhikari" style="display: none; background-color: rgba(234, 88, 12, 0.1); color: var(--accent-color); font-weight: bold; border: 1px solid var(--accent-color);" onclick="window.location.href='/adhikari.html'">👑 Adhikari (Admin)</button>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="avatar">👤</div>
+                    <div class="details">
+                        <span id="dash-name" style="display:block; font-weight:600; font-size:0.9rem;">Developer</span>
+                        <span style="font-size:0.75rem; color:var(--text-secondary);">Plan: <span id="plan-display">Free</span></span>
+                    </div>
+                </div>
+                <button class="btn btn-outline w-100 mt-1 btn-sm" onclick="logout()">Sign Out</button>
+            </div>
+        </aside>
+
+        <!-- Main Dashboard Content -->
+        <section class="dashboard-content">
+            <!-- Broadcast Banner -->
+            <div id="broadcast-banner" style="display:none; background: linear-gradient(135deg, var(--accent-color), #c2410c); color: white; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; font-weight: 500; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(234, 88, 12, 0.3);">
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <span>📣</span> <span id="broadcast-message">Promo message here</span>
+                </div>
+                <button onclick="document.getElementById('broadcast-banner').style.display='none'" style="background:transparent; border:none; color:white; cursor:pointer; font-size:1.2rem;">&times;</button>
+            </div>
+            
+            <!-- Tab: Overview -->
+            <div id="tab-overview" class="dash-tab active">
+                <div class="dashboard-header" style="margin-bottom: 2rem;">
+                    <h2>Welcome back, <span class="text-accent" id="dash-welcome-name">Developer</span>! 👋</h2>
+                    <p class="text-muted">Here is what's happening with your CountryState API account today.</p>
+                </div>
+                
+                <div class="dashboard-cards" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 2rem;">
+                    <div class="dash-card" style="padding: 1.5rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <p class="stat-label">Current Plan</p>
+                            <span style="font-size:1.5rem">💳</span>
+                        </div>
+                        <h3 style="font-size: 1.5rem; margin-top:0.5rem;" id="overview-plan">Free</h3>
+                    </div>
+                    <div class="dash-card" style="padding: 1.5rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <p class="stat-label">Daily Limit</p>
+                            <span style="font-size:1.5rem">📈</span>
+                        </div>
+                        <h3 style="font-size: 1.5rem; margin-top:0.5rem;"><span id="daily-limit">100</span> <span style="font-size:0.875rem; font-weight:normal; color:var(--text-secondary)">reqs/day</span></h3>
+                    </div>
+                    <div class="dash-card" style="padding: 1.5rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <p class="stat-label">System Status</p>
+                            <span style="font-size:1.5rem">🟢</span>
+                        </div>
+                        <h3 style="font-size: 1.5rem; margin-top:0.5rem; color: #10b981;">100% Uptime</h3>
+                    </div>
+                </div>
+                <div class="docs-quick">
+                    <h3>Quick Start</h3>
+                    <div class="code-window mt-1">
+                        <pre><code>curl -X GET "http://localhost:3000/api/v1/countries" \
+  -H "Authorization: Bearer YOUR_API_KEY"</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: API Keys -->
+            <div id="tab-keys" class="dash-tab" style="display: none;">
+                <div class="dashboard-header">
+                    <h2>API Keys</h2>
+                    <p class="text-muted">Manage your API keys and origin restrictions</p>
+                </div>
+                <div class="dash-card" style="margin-bottom: 2rem;">
+                    <h3>Current API Key</h3>
+                    <p class="text-sm text-muted mb-2">Your active API key and its settings.</p>
+                    <div class="key-box">
+                        <code id="keys-tab-display" style="filter: blur(4px); transition: filter 0.3s;">Loading...</code>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-outline btn-sm" onclick="document.getElementById('keys-tab-display').style.filter = 'none'">👁️</button>
+                            <button class="btn btn-outline btn-sm" onclick="copyApiKey()">Copy</button>
+                        </div>
+                    </div>
+                    
+                    <h4 style="margin-top: 2rem; margin-bottom: 0.5rem;">Origin Whitelist</h4>
+                    <p class="text-sm text-muted mb-2">Whitelist domains for browser requests. Leave empty to allow all.</p>
+                    <div class="alert alert-warning" style="background: #fef3c7; color: #92400e; padding: 1rem; border-radius: 0.5rem; border: 1px solid #fde68a; margin-bottom: 1rem;">
+                        You've reached your whitelist limit of 0 entries. <strong>Upgrade your plan</strong> to add more.
+                    </div>
+                    <textarea class="w-100" rows="3" disabled placeholder="e.g. https://yourdomain.com" style="padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.5rem;"></textarea>
+                </div>
+            </div>
+
+            <!-- Tab: API Usage -->
+            <div id="tab-usage" class="dash-tab" style="display: none;">
+                <div class="dashboard-header">
+                    <h2>API Usage</h2>
+                    <p class="text-muted">Monitor your API request history</p>
+                </div>
+                <div class="dashboard-cards" style="grid-template-columns: repeat(4, 1fr);">
+                    <div class="dash-card" style="padding: 1.5rem;">
+                        <p class="stat-label">Today's Requests</p>
+                        <h3 style="font-size: 1.8rem;"><span id="usage-today">0</span> <span style="font-size:1rem; color:var(--text-secondary)">/ <span id="usage-limit-today">100</span></span></h3>
+                    </div>
+                    <div class="dash-card" style="padding: 1.5rem;">
+                        <p class="stat-label">This Month</p>
+                        <h3 style="font-size: 1.8rem;"><span id="usage-month">0</span> <span style="font-size:1rem; color:var(--text-secondary)">/ <span id="usage-limit-month">3.0K</span></span></h3>
+                    </div>
+                    <div class="dash-card" style="padding: 1.5rem;">
+                        <p class="stat-label">Avg Latency</p>
+                        <h3 style="font-size: 1.8rem;"><span id="usage-latency">0.00</span>ms</h3>
+                    </div>
+                    <div class="dash-card" style="padding: 1.5rem; cursor: pointer; transition: transform 0.2s;" onclick="toggleErrorFilter()" id="errors-card" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                        <p class="stat-label">Errors <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-secondary);">(Click to filter)</span></p>
+                        <h3 style="font-size: 1.8rem; color:#ef4444;"><span id="usage-errors">0</span></h3>
+                    </div>
+                </div>
+                <div class="dash-card" style="margin-top: 2rem; padding: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem;">Recent Requests History</h3>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid var(--border-color);">
+                                    <th style="padding: 0.75rem; color: var(--text-secondary); font-weight: 600;">Date & Time (UTC)</th>
+                                    <th style="padding: 0.75rem; color: var(--text-secondary); font-weight: 600;">Endpoint</th>
+                                    <th style="padding: 0.75rem; color: var(--text-secondary); font-weight: 600;">Status</th>
+                                    <th style="padding: 0.75rem; color: var(--text-secondary); font-weight: 600;">IP Address</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usage-history-body">
+                                <tr>
+                                    <td colspan="4" style="padding: 1rem; text-align: center; color: var(--text-secondary);">Loading history...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Pricing (Dynamic) -->
+            <div id="tab-pricing" class="dash-tab" style="display: none;">
+                <div class="dashboard-header">
+                    <h2>Plans & Pricing</h2>
+                    <p class="text-muted">Choose the plan that fits your usage.</p>
+                </div>
+                <div id="pricing-grid" class="pricing-grid" style="gap: 1.25rem;">
+                    <!-- Plans loaded dynamically from API -->
+                    <div style="grid-column: 1/-1; text-align:center; padding:3rem; color:#94a3b8;">Loading plans…</div>
+                </div>
+            </div>
+
+            <!-- Tab: Settings -->
+            <div id="tab-settings" class="dash-tab" style="display: none;">
+                <div class="settings-profile-header mb-2" style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+                    <div class="avatar-large" style="width: 64px; height: 64px; background: var(--accent-color); color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold;">
+                        <span id="settings-initial">?</span>
+                    </div>
+                    <div>
+                        <h2 style="margin:0; font-size: 1.5rem;" id="settings-name">Loading…</h2>
+                        <p class="text-muted" style="margin: 0.2rem 0;" id="settings-email"></p>
+                        <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                            <span class="badge" style="background: #dcfce7; color: #166534; padding: 0.2rem 0.6rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 600;">● Active</span>
+                            <span class="badge" style="background: #f1f5f9; color: #475569; padding: 0.2rem 0.6rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 600;" id="settings-plan-badge">Free Plan</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+                    <!-- Personal Info -->
+                    <div class="dash-card">
+                        <div class="card-header" style="margin-bottom: 1.5rem;">
+                            <h3 style="margin:0;">Personal Information</h3>
+                            <p class="text-sm text-muted">Update your personal details</p>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                            <div>
+                                <label style="display:block; font-size:0.875rem; margin-bottom:0.5rem; font-weight:500;">Full Name</label>
+                                <input type="text" id="settings-input-name" class="form-control w-100" style="padding:0.75rem; border:1px solid var(--border-color); border-radius:0.5rem;" value="">
+                            </div>
+                            <div>
+                                <label style="display:block; font-size:0.875rem; margin-bottom:0.5rem; font-weight:500;">Email</label>
+                                <input type="text" id="settings-input-email" class="form-control w-100" style="padding:0.75rem; border:1px solid var(--border-color); border-radius:0.5rem; background:#f8fafc;" disabled value="">
+                            </div>
+                        </div>
+                        <div class="alert" style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem;">
+                            <p class="text-sm text-muted" style="margin:0;">Your email address is your login and can't be changed. Contact support if you need assistance.</p>
+                        </div>
+                        <div style="display:flex; justify-content:flex-end; gap:1rem;">
+                            <button class="btn btn-outline" onclick="switchDashTab('overview')">Cancel</button>
+                            <button class="btn btn-primary" onclick="saveSettings()">Save Changes</button>
+                        </div>
+                    </div>
+
+                    <!-- Side Options -->
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        <div class="dash-card">
+                            <div class="card-header" style="margin-bottom: 1.5rem;">
+                                <h3>🔔 Notifications</h3>
+                                <p class="text-sm text-muted">Manage email preferences</p>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+                                <div>
+                                    <strong style="display:block; font-size:0.875rem;">Usage Alerts</strong>
+                                    <span class="text-sm text-muted">Warnings before hitting limits</span>
+                                </div>
+                                <label class="switch"><input type="checkbox" id="settings-alert-usage" checked><span class="slider round"></span></label>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <strong style="display:block; font-size:0.875rem;">Service Updates</strong>
+                                    <span class="text-sm text-muted">New features and releases</span>
+                                </div>
+                                <label class="switch"><input type="checkbox" id="settings-alert-updates" checked><span class="slider round"></span></label>
+                            </div>
+                        </div>
+
+                        <div class="dash-card">
+                            <div class="card-header" style="margin-bottom: 1.5rem;">
+                                <h3>Account</h3>
+                                <p class="text-sm text-muted">Manage your account status</p>
+                            </div>
+                            <p class="text-sm text-muted" style="margin-bottom: 1.5rem;">Deactivating pauses API access immediately. You can reactivate anytime.</p>
+                            <button id="btn-deactivate" class="btn w-100" style="background: #ef4444; color: white; padding: 0.75rem; border-radius: 0.5rem; font-weight: 600; border: none; cursor: pointer;" onclick="deactivateAccount()">🗑️ Deactivate Account</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Tab: Documentation -->
+            <div id="tab-docs" class="dash-tab" style="display: none;">
+                <div class="dashboard-header">
+                    <h2>API Documentation</h2>
+                    <p class="text-muted">Step-by-step guide to integrate the CountryState API</p>
+                </div>
+                
+                <div class="dash-card mb-2" style="padding: 2rem;">
+                    <h3>1. Authentication</h3>
+                    <p class="text-sm text-muted mb-2">Every API request requires an active API Key passed in the Headers.</p>
+                    <div class="code-window">
+                        <div class="window-header">
+                            <div style="display:flex;gap:4px">
+                                <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
+                            </div>
+                            <span class="title" style="margin-left: 10px;">Request Header</span>
+                        </div>
+                        <pre><code>Authorization: Bearer YOUR_API_KEY</code></pre>
+                    </div>
+                </div>
+
+                <div class="dash-card mb-2" style="padding: 2rem;">
+                    <h3>2. Get All Countries</h3>
+                    <p class="text-sm text-muted mb-2">Fetch a list of all supported countries, their ISO codes, and metadata.</p>
+                    <div class="code-window mb-2">
+                        <div class="window-header">
+                            <span class="badge" style="margin:0; padding:0.1rem 0.5rem; background:#10b981; color:white; font-size:0.75rem; border:none;">GET</span>
+                            <span class="title" style="margin-left:0.5rem; color:#0f172a; font-weight:bold;">/api/v1/countries</span>
+                        </div>
+                        <pre><code>curl -X GET "http://localhost:3000/api/v1/countries" \
+  -H "Authorization: Bearer YOUR_API_KEY"</code></pre>
+                    </div>
+                    
+                    <p class="text-sm" style="font-weight:600; margin-bottom:0.5rem;">Sample Response:</p>
+                    <pre style="background:#f8fafc; padding:1rem; border:1px solid #e2e8f0; border-radius:0.5rem; font-size:0.875rem;"><code>{
+  "status": "success",
+  "data": [
+    {
+      "id": 1,
+      "name": "India",
+      "iso2": "IN",
+      "currency_code": "INR",
+      "emoji": "🇮🇳"
+    }
+  ]
+}</code></pre>
+                </div>
+
+                <div class="dash-card mb-2" style="padding: 2rem;">
+                    <h3>3. Get States by Country</h3>
+                    <p class="text-sm text-muted mb-2">Fetch all states for a specific country using its 2-letter ISO code.</p>
+                    <div class="code-window">
+                        <div class="window-header">
+                            <span class="badge" style="margin:0; padding:0.1rem 0.5rem; background:#10b981; color:white; font-size:0.75rem; border:none;">GET</span>
+                            <span class="title" style="margin-left:0.5rem; color:#0f172a; font-weight:bold;">/api/v1/countries/:iso2/states</span>
+                        </div>
+                        <pre><code>curl -X GET "http://localhost:3000/api/v1/countries/IN/states" \
+  -H "Authorization: Bearer YOUR_API_KEY"</code></pre>
+                    </div>
+                </div>
+
+                <div class="dash-card" style="padding: 2rem;">
+                    <h3>4. Get Cities by State</h3>
+                    <p class="text-sm text-muted mb-2">Fetch all cities within a specific state.</p>
+                    <div class="code-window">
+                        <div class="window-header">
+                            <span class="badge" style="margin:0; padding:0.1rem 0.5rem; background:#10b981; color:white; font-size:0.75rem; border:none;">GET</span>
+                            <span class="title" style="margin-left:0.5rem; color:#0f172a; font-weight:bold;">/api/v1/countries/:iso2/states/:stateCode/cities</span>
+                        </div>
+                        <pre><code>curl -X GET "http://localhost:3000/api/v1/countries/IN/states/MH/cities" \
+  -H "Authorization: Bearer YOUR_API_KEY"</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+            <p>&copy; 2026 CountryState API. All rights reserved.</p>
+            <div style="font-size: 0.85rem;">
+                <a href="/terms.html" style="color: var(--accent); text-decoration: none; margin-right: 15px;">Terms of Service</a>
+                <a href="/privacy.html" style="color: var(--accent); text-decoration: none;">Privacy Policy</a>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-light); margin-top: 5px;">
+                Geographical data sourced from <a href="https://github.com/dr5hn/countries-states-cities-database" target="_blank" style="color: var(--text-light); text-decoration: underline;">countries-states-cities-database</a> under ODbL.
+            </p>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal">
+            <button class="close-modal" onclick="closeModal('loginModal')">&times;</button>
+            <h2>Sign In</h2>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <div style="text-align: right; margin-top: -10px; margin-bottom: 15px;">
+                    <a href="#" onclick="closeModal('loginModal'); openModal('forgotPasswordModal'); event.preventDefault();" style="font-size: 0.85rem; color: var(--accent); text-decoration: none;">Forgot Password?</a>
+                </div>
+                <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" data-theme="light" style="margin-bottom: 1rem;"></div>
+                <div class="form-error" id="loginError"></div>
+                <button type="submit" class="btn btn-primary w-100" id="loginBtn">Sign In</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="modal-overlay">
+        <div class="modal">
+            <button class="close-modal" onclick="closeModal('forgotPasswordModal')">&times;</button>
+            <h2>Reset Password</h2>
+            <p style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 1.5rem;">Enter your email address and we'll send you a link to reset your password.</p>
+            <form id="forgotPasswordForm" onsubmit="handleForgotPassword(event)">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="forgotEmail" required>
+                </div>
+                <div class="form-error" id="forgotError"></div>
+                <button type="submit" class="btn btn-primary w-100" id="forgotBtn">Send Reset Link</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reset Password Modal -->
+    <div id="resetPasswordModal" class="modal-overlay">
+        <div class="modal">
+            <button class="close-modal" onclick="closeModal('resetPasswordModal')">&times;</button>
+            <h2>Create New Password</h2>
+            <form id="resetPasswordForm" onsubmit="handleResetPassword(event)">
+                <input type="hidden" id="resetToken">
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" id="resetNewPassword" required minlength="8">
+                </div>
+                <div class="form-error" id="resetError"></div>
+                <button type="submit" class="btn btn-primary w-100" id="resetBtn">Reset Password</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="registerModal" class="modal-overlay">
+        <div class="modal">
+            <button class="close-modal" onclick="closeModal('registerModal')">&times;</button>
+            <h2>Create Account</h2>
+            <p class="text-sm text-muted mb-2">Get your free API key instantly.</p>
+            <form id="registerForm" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="regName" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="regEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="regPassword" required minlength="8" placeholder="Min 8 characters">
+                </div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                    <input type="checkbox" id="regConsent" required style="width: auto;">
+                    <label for="regConsent" style="margin: 0; font-size: 0.85rem; font-weight: 400; color: var(--text-light);">
+                        I agree to the <a href="/terms.html" target="_blank" style="color: var(--accent);">Terms</a> and <a href="/privacy.html" target="_blank" style="color: var(--accent);">Privacy Policy</a>.
+                    </label>
+                </div>
+                <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" data-theme="light" style="margin-bottom: 1rem;"></div>
+                <div class="form-error" id="regError"></div>
+                <button type="submit" class="btn btn-primary w-100" id="regBtn">Create Free Account</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/app.js?v=2.0.1"></script>
+</body>
+</html>

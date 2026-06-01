@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CountryState API - Admin Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body { background: #4DE9D9; color: #0f172a; font-family: 'Inter', sans-serif; margin: 0; }
+
+        .admin-nav { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; border-bottom: 1px solid rgba(0,0,0,0.1); background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 50; }
+        .admin-nav h1 { margin: 0; font-size: 1.1rem; font-weight: 800; background: linear-gradient(135deg, #ef4444, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .admin-container { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { background: #ffffff; border: 1px solid rgba(0,0,0,0.1); border-radius: 0.75rem; padding: 1.25rem; transition: all 0.2s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .stat-card:hover { transform: translateY(-3px); border-color: #ea580c; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .stat-value { font-size: 2rem; font-weight: 800; display: block; }
+        .stat-label { font-size: 0.7rem; color: #475569; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        .tabs-row { display: flex; border-bottom: 2px solid rgba(0,0,0,0.1); margin-bottom: 1.5rem; }
+        .tab-btn { background: none; border: none; color: #475569; font-size: 0.9rem; font-weight: 600; padding: 0.75rem 1.5rem; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; font-family: 'Inter', sans-serif; }
+        .tab-btn:hover { color: #0f172a; }
+        .tab-btn.active { color: #ea580c; border-bottom-color: #ea580c; }
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; }
+
+        .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+        .search-wrap { position: relative; flex: 1; min-width: 200px; max-width: 320px; }
+        .search-wrap input { width: 100%; background: #ffffff; border: 1px solid rgba(0,0,0,0.2); color: #0f172a; padding: 0.6rem 0.75rem 0.6rem 2.2rem; border-radius: 0.5rem; font-size: 0.875rem; font-family: 'Inter', sans-serif; }
+        .search-wrap input:focus { outline: none; border-color: #ea580c; }
+        .search-wrap::before { content: "🔍"; position: absolute; left: 0.65rem; top: 50%; transform: translateY(-50%); font-size: 0.75rem; }
+
+        .data-table-wrap { background: #ffffff; border: 1px solid rgba(0,0,0,0.1); border-radius: 0.75rem; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background: #f8fafc; padding: 0.8rem 1rem; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #475569; font-weight: 600; border-bottom: 1px solid rgba(0,0,0,0.1); white-space: nowrap; }
+        td { padding: 0.8rem 1rem; border-bottom: 1px solid rgba(0,0,0,0.05); color: #334155; font-size: 0.83rem; vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(0,0,0,0.02); }
+
+        .pagination { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; border-top: 1px solid rgba(0,0,0,0.1); flex-wrap: wrap; gap: 0.5rem; }
+        .page-info { font-size: 0.78rem; color: #475569; }
+        .page-btns { display: flex; gap: 0.3rem; align-items: center; }
+        .page-btn { background: #ffffff; border: 1px solid rgba(0,0,0,0.2); color: #475569; padding: 0.3rem 0.65rem; border-radius: 0.4rem; cursor: pointer; font-size: 0.78rem; font-weight: 600; transition: all 0.15s; font-family: 'Inter', sans-serif; }
+        .page-btn:hover:not(:disabled) { border-color: #ea580c; color: #ea580c; }
+        .page-btn.cur { background: #ea580c; border-color: #ea580c; color: white; }
+        .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .badge { padding: 0.2rem 0.6rem; border-radius: 1rem; font-size: 0.7rem; font-weight: 700; display: inline-block; }
+        .badge.free         { background: rgba(148,163,184,0.15); color: #475569; border: 1px solid rgba(148,163,184,0.25); }
+        .badge.starter      { background: rgba(6,182,212,0.15);   color: #0891b2; border: 1px solid rgba(6,182,212,0.25); }
+        .badge.supporter    { background: rgba(234,179,8,0.15);    color: #ca8a04; border: 1px solid rgba(234,179,8,0.25); }
+        .badge.professional { background: rgba(59,130,246,0.15);   color: #2563eb; border: 1px solid rgba(59,130,246,0.25); }
+        .badge.business     { background: rgba(139,92,246,0.15);   color: #7c3aed; border: 1px solid rgba(139,92,246,0.25); }
+        .badge.active   { background: rgba(34,197,94,0.15);  color: #16a34a; border: 1px solid rgba(34,197,94,0.25); }
+        .badge.inactive { background: rgba(239,68,68,0.15);  color: #dc2626; border: 1px solid rgba(239,68,68,0.25); }
+        .badge.adm      { background: rgba(251,146,60,0.15); color: #ea580c; border: 1px solid rgba(251,146,60,0.25); }
+
+        .btn-sm  { background: #ea580c; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 700; cursor: pointer; font-size: 0.8rem; font-family: 'Inter', sans-serif; transition: background 0.2s; white-space: nowrap; }
+        .btn-sm:hover { background: #c2410c; }
+        .btn-outline-sm { background: transparent; border: 1px solid #ea580c; color: #ea580c; padding: 0.35rem 0.8rem; border-radius: 0.4rem; cursor: pointer; font-weight: 600; font-size: 0.75rem; transition: all 0.2s; font-family: 'Inter', sans-serif; }
+        .btn-outline-sm:hover { background: #ea580c; color: white; }
+
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 100; align-items: center; justify-content: center; padding: 1rem; }
+        .modal.active { display: flex; }
+        .modal-box { background: #ffffff; border: 1px solid rgba(0,0,0,0.1); border-radius: 1rem; width: 100%; max-width: 460px; padding: 2rem; box-shadow: 0 25px 50px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; color: #0f172a; }
+        .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 0.5rem; }
+        .modal-head h2 { margin: 0; font-size: 1.1rem; }
+        .x-btn { background: none; border: none; color: #475569; cursor: pointer; font-size: 1.4rem; line-height: 1; }
+        .x-btn:hover { color: #0f172a; }
+        .fg { margin-bottom: 1rem; }
+        .fg label { display: block; margin-bottom: 0.35rem; font-size: 0.72rem; color: #475569; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+        .fc { width: 100%; padding: 0.65rem 0.85rem; border: 1px solid rgba(0,0,0,0.2); border-radius: 0.5rem; background: #ffffff; color: #0f172a; font-family: 'Inter', sans-serif; font-size: 0.875rem; transition: border-color 0.2s; }
+        .fc:focus { outline: none; border-color: #ea580c; }
+        .fc-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+        .btn-grad { background: linear-gradient(135deg, #ef4444, #f59e0b); color: white; border: none; padding: 0.75rem; border-radius: 0.5rem; font-weight: 700; cursor: pointer; width: 100%; font-family: 'Inter', sans-serif; font-size: 0.9rem; margin-top:0.5rem; }
+        .btn-grad:hover { opacity: 0.88; }
+        .divider { border-top: 1px solid rgba(0,0,0,0.1); margin: 1.25rem 0; }
+        .section-lbl { font-size: 0.78rem; color: #475569; margin: 0 0 0.75rem; }
+
+        .empty { text-align: center; padding: 3rem; color: #475569; font-size: 0.875rem; }
+    </style>
+</head>
+<body>
+
+<nav class="admin-nav">
+    <h1>⚡ CountryState API &nbsp;·&nbsp; Admin Portal</h1>
+    <div style="display:flex; gap:1rem; align-items:center;">
+        <span id="admin-name-display" style="color:#475569; font-size:0.8rem; font-weight:500;"></span>
+        <a href="/" style="color:#94a3b8; text-decoration:none; font-size:0.82rem; font-weight:600; border:1px solid #334155; padding:0.4rem 0.85rem; border-radius:0.5rem;">← Exit</a>
+    </div>
+</nav>
+
+<div class="admin-container">
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span class="stat-label">Total Users</span>
+            <span class="stat-value" id="stat-users" style="color:#3b82f6;">–</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">API Calls Today</span>
+            <span class="stat-value" id="stat-calls" style="color:#10b981;">–</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Paid Users</span>
+            <span class="stat-value" id="stat-paid" style="color:#a78bfa;">–</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Active Plans</span>
+            <span class="stat-value" id="stat-plans" style="color:#fb923c;">–</span>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-row">
+        <button class="tab-btn active" onclick="switchTab('users')">👥&nbsp; Users</button>
+        <button class="tab-btn" onclick="switchTab('plans')">💎&nbsp; Plans</button>
+    </div>
+
+    <!-- USERS TAB -->
+    <div id="tab-users" class="tab-pane active">
+        <div class="toolbar">
+            <div class="search-wrap">
+                <input type="text" id="user-search" placeholder="Search name or email…" oninput="onUserSearch(this.value)">
+            </div>
+            <button class="btn-sm" onclick="openModal('newUserModal')">+ New User</button>
+        </div>
+        <div class="data-table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name / Role</th>
+                        <th>Email</th>
+                        <th>Plan</th>
+                        <th>Today</th>
+                        <th>Limit/Day</th>
+                        <th>Status</th>
+                        <th>Joined</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="users-tbody">
+                    <tr><td colspan="8" class="empty">Loading users…</td></tr>
+                </tbody>
+            </table>
+            <div class="pagination" id="users-pagination"></div>
+        </div>
+    </div>
+
+    <!-- PLANS TAB -->
+    <div id="tab-plans" class="tab-pane">
+        <div class="toolbar">
+            <h3 style="margin:0; font-size:1rem; color:#f1f5f9;">Subscription Plans</h3>
+            <button class="btn-sm" onclick="openModal('newPlanModal')">+ New Plan</button>
+        </div>
+        <div class="data-table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Code</th>
+                        <th>Daily Limit</th>
+                        <th>Monthly Limit</th>
+                        <th>Price / Month</th>
+                        <th>Price / Year</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="plans-tbody">
+                    <tr><td colspan="8" class="empty">Loading plans…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div><!-- /admin-container -->
+
+
+<!-- ══════════════ MODALS ══════════════ -->
+
+<!-- NEW USER -->
+<div class="modal" id="newUserModal">
+    <div class="modal-box">
+        <div class="modal-head">
+            <h2>➕ Create New User</h2>
+            <button class="x-btn" onclick="closeModal('newUserModal')">×</button>
+        </div>
+        <form onsubmit="createUser(event)">
+            <div class="fg">
+                <label>Full Name</label>
+                <input type="text" id="nu-name" class="fc" placeholder="Ravi Kumar" required>
+            </div>
+            <div class="fg">
+                <label>Email</label>
+                <input type="email" id="nu-email" class="fc" placeholder="user@example.com" required>
+            </div>
+            <div class="fg">
+                <label>Temporary Password</label>
+                <input type="text" id="nu-password" class="fc" placeholder="Min 8 characters" required minlength="8">
+            </div>
+            <div class="fc-row">
+                <div class="fg">
+                    <label>Plan</label>
+                    <select id="nu-plan" class="fc" onchange="autoFillNewUserLimit(this.value)"></select>
+                </div>
+                <div class="fg">
+                    <label>Role</label>
+                    <select id="nu-role" class="fc">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+            </div>
+            <div class="fg">
+                <label>Daily Limit (auto from plan)</label>
+                <input type="number" id="nu-limit" class="fc" placeholder="100">
+            </div>
+            <button type="submit" class="btn-grad">Create User</button>
+        </form>
+    </div>
+</div>
+
+<!-- EDIT USER -->
+<div class="modal" id="editModal">
+    <div class="modal-box">
+        <div class="modal-head">
+            <h2>✏️ Edit User</h2>
+            <button class="x-btn" onclick="closeModal('editModal')">×</button>
+        </div>
+        <form onsubmit="saveUser(event)">
+            <input type="hidden" id="edit-userId">
+            <div class="fg">
+                <label>Subscription Plan</label>
+                <select id="edit-plan" class="fc"></select>
+            </div>
+            <div class="fg">
+                <label>Daily API Limit</label>
+                <input type="number" id="edit-limit" class="fc" placeholder="100">
+            </div>
+            <div class="fc-row">
+                <div class="fg">
+                    <label>Role</label>
+                    <select id="edit-role" class="fc">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="fg">
+                    <label>Status</label>
+                    <select id="edit-active" class="fc">
+                        <option value="true">Active</option>
+                        <option value="false">Suspended</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="btn-grad">Save Changes</button>
+        </form>
+        <div class="divider"></div>
+        <p class="section-lbl">📣 Send Promo Notification</p>
+        <div class="fg">
+            <label>Message</label>
+            <input type="text" id="edit-promo-message" class="fc" placeholder="e.g. You've been upgraded!">
+        </div>
+        <div class="fc-row">
+            <div class="fg">
+                <label>Banner Type</label>
+                <select id="edit-promo-type" class="fc">
+                    <option value="promo">Promotion (Green)</option>
+                    <option value="info">Alert (Orange)</option>
+                </select>
+            </div>
+            <div class="fg" style="display:flex; align-items:flex-end;">
+                <button type="button" class="btn-sm" style="width:100%;" onclick="sendTargetedPromo()">Send</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- NEW PLAN -->
+<div class="modal" id="newPlanModal">
+    <div class="modal-box">
+        <div class="modal-head">
+            <h2>➕ Create New Plan</h2>
+            <button class="x-btn" onclick="closeModal('newPlanModal')">×</button>
+        </div>
+        <form onsubmit="createPlan(event)">
+            <div class="fc-row">
+                <div class="fg">
+                    <label>Code (unique slug)</label>
+                    <input type="text" id="np-code" class="fc" placeholder="enterprise" required>
+                </div>
+                <div class="fg">
+                    <label>Display Name</label>
+                    <input type="text" id="np-name" class="fc" placeholder="Enterprise" required>
+                </div>
+            </div>
+            <div class="fc-row">
+                <div class="fg">
+                    <label>Daily Limit</label>
+                    <input type="number" id="np-daily" class="fc" placeholder="e.g. 100" required>
+                </div>
+                <div class="fg">
+                    <label>Monthly Limit <span style="color:#3b82f6; font-size:0.68rem; font-weight:500; text-transform:none;">(auto = daily × 30)</span></label>
+                    <input type="number" id="np-monthly" class="fc" placeholder="auto" required>
+                </div>
+            </div>
+            <div class="fc-row">
+                <div class="fg">
+                    <label>Monthly Price ($)</label>
+                    <input type="number" step="0.01" id="np-pm" class="fc" placeholder="0.00">
+                </div>
+                <div class="fg">
+                    <label>Yearly Price ($)</label>
+                    <input type="number" step="0.01" id="np-py" class="fc" placeholder="0.00">
+                </div>
+            </div>
+            <button type="submit" class="btn-grad">Create Plan</button>
+        </form>
+    </div>
+</div>
+
+<!-- EDIT PLAN -->
+<div class="modal" id="editPlanModal">
+    <div class="modal-box">
+        <div class="modal-head">
+            <h2>✏️ Edit Plan</h2>
+            <button class="x-btn" onclick="closeModal('editPlanModal')">×</button>
+        </div>
+        <form onsubmit="savePlan(event)">
+            <input type="hidden" id="edit-plan-id">
+            <div class="fc-row">
+                <div class="fg">
+                    <label>Daily Limit</label>
+                    <input type="number" id="edit-plan-daily" class="fc" required>
+                </div>
+                <div class="fg">
+                    <label>Monthly Limit <span style="color:#3b82f6; font-size:0.68rem; font-weight:500; text-transform:none;">(auto = daily × 30)</span></label>
+                    <input type="number" id="edit-plan-monthly" class="fc" required>
+                </div>
+            </div>
+            <div class="fc-row">
+                <div class="fg">
+                    <label>Monthly Price ($)</label>
+                    <input type="number" step="0.01" id="edit-plan-pm" class="fc" required>
+                </div>
+                <div class="fg">
+                    <label>Yearly Price ($)</label>
+                    <input type="number" step="0.01" id="edit-plan-py" class="fc" required>
+                </div>
+            </div>
+            <div class="fg">
+                <label>Status</label>
+                <select id="edit-plan-active" class="fc">
+                    <option value="true">Active</option>
+                    <option value="false">Hidden / Disabled</option>
+                </select>
+            </div>
+            <div style="display:flex; gap:0.75rem; margin-top:0.5rem;">
+                <button type="button" class="btn-outline-sm" style="flex:1; padding:0.65rem;" onclick="closeModal('editPlanModal')">Cancel</button>
+                <button type="submit" class="btn-grad" style="flex:2; margin-top:0;">Save Plan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- USER USAGE HISTORY MODAL -->
+<div class="modal" id="logsModal" style="padding:1rem;">
+    <div class="modal-box" style="max-width:720px; width:100%;">
+        <div class="modal-head">
+            <div>
+                <h2 style="margin:0;">📊 Usage History</h2>
+                <p id="logs-user-info" style="margin:0.25rem 0 0; font-size:0.8rem; color:#64748b;"></p>
+            </div>
+            <button class="x-btn" onclick="closeModal('logsModal')">×</button>
+        </div>
+
+        <!-- Summary Cards -->
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:0.75rem; margin-bottom:1.25rem;">
+            <div style="background:#ffffff; border:1px solid rgba(0,0,0,0.1); border-radius:0.6rem; padding:1rem; text-align:center; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);">
+                <div id="logs-total-lifetime" style="font-size:1.6rem; font-weight:800; color:#2563eb;">–</div>
+                <div style="font-size:0.7rem; color:#475569; text-transform:uppercase; letter-spacing:0.05em;">Total API Calls</div>
+            </div>
+            <div style="background:#ffffff; border:1px solid rgba(0,0,0,0.1); border-radius:0.6rem; padding:1rem; text-align:center; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);">
+                <div id="logs-daily-limit" style="font-size:1.6rem; font-weight:800; color:#16a34a;">–</div>
+                <div style="font-size:0.7rem; color:#475569; text-transform:uppercase; letter-spacing:0.05em;">Daily Limit</div>
+            </div>
+            <div style="background:#ffffff; border:1px solid rgba(0,0,0,0.1); border-radius:0.6rem; padding:1rem; text-align:center; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);">
+                <div id="logs-first-call" style="font-size:1rem; font-weight:700; color:#ea580c;">–</div>
+                <div style="font-size:0.7rem; color:#475569; text-transform:uppercase; letter-spacing:0.05em;">First API Call</div>
+            </div>
+        </div>
+
+        <!-- Period Filter -->
+        <div style="display:flex; gap:0.4rem; margin-bottom:1rem; flex-wrap:wrap;">
+            <button class="log-period-btn active" onclick="setLogPeriod('7d')">Last 7 Days</button>
+            <button class="log-period-btn" onclick="setLogPeriod('30d')">Last 30 Days</button>
+            <button class="log-period-btn" onclick="setLogPeriod('90d')">Last 90 Days</button>
+            <button class="log-period-btn" onclick="setLogPeriod('365d')">This Year</button>
+            <button class="log-period-btn" onclick="setLogPeriod('all')">All Time</button>
+        </div>
+
+        <!-- Log Table -->
+        <div class="data-table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>API Calls</th>
+                        <th>vs Daily Limit</th>
+                        <th>Usage Bar</th>
+                    </tr>
+                </thead>
+                <tbody id="logs-tbody">
+                    <tr><td colspan="4" class="empty">Loading…</td></tr>
+                </tbody>
+            </table>
+            <div class="pagination" id="logs-pagination"></div>
+        </div>
+    </div>
+</div>
+
+<style>
+.log-period-btn {
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.2);
+    color: #475569;
+    padding: 0.35rem 0.85rem;
+    border-radius: 2rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.15s;
+}
+.log-period-btn:hover { border-color: #ea580c; color: #ea580c; }
+.log-period-btn.active { background: #ea580c; border-color: #ea580c; color: white; }
+</style>
+    </main>
+    <footer style="text-align: center; padding: 2rem; color: #64748b; font-size: 0.85rem; border-top: 1px solid #e2e8f0; margin-top: auto;">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+            <p style="margin: 0;">&copy; 2026 CountryState API Admin.</p>
+            <div>
+                <a href="/terms.html" style="color: #ea580c; text-decoration: none; margin-right: 15px;">Terms of Service</a>
+                <a href="/privacy.html" style="color: #ea580c; text-decoration: none;">Privacy Policy</a>
+            </div>
+            <p style="font-size: 0.8rem; margin: 0; margin-top: 5px;">
+                Geographical data sourced from <a href="https://github.com/dr5hn/countries-states-cities-database" target="_blank" style="color: #64748b; text-decoration: underline;">countries-states-cities-database</a> under ODbL.
+            </p>
+        </div>
+    </footer>
+
+<script src="/js/admin.js"></script>
+</body>
+</html>

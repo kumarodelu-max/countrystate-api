@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing - CountryState API</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .pricing-container { max-width: 1200px; margin: 0 auto; padding: 6rem 2rem; text-align: center; }
+        .pricing-header h1 { font-size: 3.5rem; margin-bottom: 1rem; color: var(--text-primary); }
+        .pricing-header p { font-size: 1.25rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto 4rem auto; line-height: 1.6; }
+
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; align-items: center; }
+        
+        .pricing-card { background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 1.5rem; padding: 3rem 2rem; text-align: left; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .pricing-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        
+        .pricing-card.popular { border: 2px solid var(--accent-color); transform: scale(1.05); z-index: 10; box-shadow: 0 20px 40px var(--gradient-glow); }
+        .pricing-card.popular:hover { transform: scale(1.05) translateY(-10px); box-shadow: 0 25px 50px var(--gradient-glow); }
+        .popular-badge { position: absolute; top: 0; left: 50%; transform: translateX(-50%); background: var(--gradient-primary); color: white; padding: 0.4rem 1.5rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; border-bottom-left-radius: 1rem; border-bottom-right-radius: 1rem; }
+
+        .plan-name { font-size: 1.5rem; font-family: var(--font-display); font-weight: 700; margin-bottom: 0.5rem; color: var(--text-primary); }
+        .plan-price { font-size: 3.5rem; font-family: var(--font-display); font-weight: 800; margin-bottom: 0.5rem; display: flex; align-items: flex-end; gap: 0.5rem; color: var(--text-primary); }
+        .plan-price span { font-size: 1.1rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 0.8rem; }
+        .plan-desc { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 2rem; line-height: 1.5; border-bottom: 1px solid var(--border-color); padding-bottom: 2rem; }
+
+        .features-list { list-style: none; padding: 0; margin: 0 0 2rem 0; }
+        .features-list li { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem; color: var(--text-primary); font-size: 0.95rem; font-weight: 500; }
+        .features-list li svg { flex-shrink: 0; width: 22px; height: 22px; color: var(--accent-color); }
+        
+        .btn-pricing { display: block; width: 100%; text-align: center; padding: 1rem; border-radius: 0.75rem; font-family: var(--font-sans); font-weight: 600; font-size: 1rem; transition: all 0.2s; text-decoration: none; cursor: pointer; }
+        .btn-free { background: var(--surface-color); border: 2px solid var(--text-primary); color: var(--text-primary); }
+        .btn-free:hover { background: var(--text-primary); color: white; }
+        
+        .btn-pro { background: var(--gradient-primary); color: white; border: none; box-shadow: 0 4px 15px var(--gradient-glow); }
+        .btn-pro:hover { box-shadow: 0 6px 20px var(--gradient-glow); transform: translateY(-2px); }
+
+        .btn-enterprise { background: var(--text-primary); color: white; border: none; }
+        .btn-enterprise:hover { background: #1e293b; }
+
+        /* Current Plan Indicator */
+        .current-plan-indicator { display: none; background: rgba(34, 197, 94, 0.1); color: #16a34a; font-size: 0.875rem; padding: 0.75rem; text-align: center; border-radius: 0.5rem; margin-top: 1.5rem; font-weight: 600; border: 1px solid rgba(34, 197, 94, 0.2); }
+        
+        /* Navbar overlay */
+        .nav-overlay { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 3rem; background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .nav-brand { font-size: 1.5rem; font-family: var(--font-display); font-weight: 800; color: var(--text-primary); text-decoration: none; }
+        .nav-link { color: var(--text-secondary); text-decoration: none; font-size: 1rem; font-weight: 600; transition: color 0.2s; }
+        .nav-link:hover { color: var(--accent-color); }
+    </style>
+</head>
+<body>
+
+    <nav class="nav-overlay">
+        <a href="/" class="nav-brand text-gradient">CountryState API</a>
+        <div style="display:flex; gap:2rem; align-items:center;">
+            <a href="/" class="nav-link">Dashboard</a>
+            <a href="/docs" class="nav-link">Documentation</a>
+        </div>
+    </nav>
+
+    <div class="pricing-container">
+        <div class="pricing-header">
+            <h1>Simple, predictable pricing</h1>
+            <p>Whether you're building a side project or a global enterprise application, we have a plan that fits your needs.</p>
+        </div>
+
+        <div class="pricing-grid">
+            
+            <!-- Free Plan -->
+            <div class="pricing-card" id="card-free">
+                <h3 class="plan-name">Community</h3>
+                <div class="plan-price">$0<span>/month</span></div>
+                <p class="plan-desc">Perfect for testing, prototyping, and very small applications.</p>
+                <ul class="features-list">
+                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg> 100 requests per day</li>
+                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg> 3,000 requests per month</li>
+                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg> Countries, States, & Cities</li>
+                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg> Standard Latency</li>
+                </ul>
+                <button class="btn-pricing btn-free" onclick="window.location.href='/'">Get Started</button>
+                <div class="current-plan-indicator" id="indicator-free">✓ Your Current Plan</div>
+            </div>
+
+            <!-- Pro Plan -->
+            <div class="pricing-card popular" id="card-pro">
+                <div class="popular-badge">Most Popular</div>
+                <h3 class="plan-name">Pro Developer</h3>
+                <div class="plan-price">$9<span>/month</span></div>
+                <p class="plan-desc">For production applications that need higher rate limits and guaranteed uptime.</p>
+                <ul class="features-list">
+                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg> 10,000 requests per day</li>
+                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg> Unlimited monthly requests</li>
+                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg> Global Edge Caching (Ultra-fast)</li>
+                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg> Priority Email Support</li>
+                </ul>
+                <button class="btn-pricing btn-pro" onclick="alert('Stripe Checkout coming soon!')">Upgrade to Pro</button>
+                <div class="current-plan-indicator" id="indicator-professional">✓ Your Current Plan</div>
+            </div>
+
+            <!-- Enterprise Plan -->
+            <div class="pricing-card" id="card-enterprise">
+                <h3 class="plan-name">Enterprise</h3>
+                <div class="plan-price">$49<span>/month</span></div>
+                <p class="plan-desc">For large-scale platforms requiring dedicated infrastructure and SLAs.</p>
+                <ul class="features-list">
+                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg> Unlimited daily requests</li>
+                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg> 99.99% Uptime SLA</li>
+                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg> Multiple API Keys</li>
+                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg> Dedicated Account Manager</li>
+                </ul>
+                <button class="btn-pricing btn-enterprise" onclick="alert('Contact Sales to upgrade.')">Contact Sales</button>
+                <div class="current-plan-indicator" id="indicator-business">✓ Your Current Plan</div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            try {
+                const user = JSON.parse(localStorage.getItem('cs_user'));
+                if (user && user.plan) {
+                    const indicator = document.getElementById('indicator-' + user.plan.toLowerCase());
+                    if (indicator) {
+                        indicator.style.display = 'block';
+                    }
+                }
+            } catch (e) {}
+        };
+    </script>
+</body>
+</html>

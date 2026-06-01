@@ -10,8 +10,8 @@
 // ==========================================
 // 1. Configuration
 // ==========================================
-$api_base_url = 'http://localhost:3000/api/v1';
-$api_key      = 'cs_f67210466181ac4e5e3b1dd9231fa6f942428af547e4acde1d6346e9'; // Replace with an API key from your dashboard
+$api_base_url = 'https://countrystatecityapp.in/api/v1';
+$api_key      = 'cs_cceef13c266294f34c00d79e16999d84a09c6b374e3752418f7df740'; // Replace with an API key from your dashboard
 
 // ==========================================
 // 2. Helper Function: Make API Request
@@ -28,12 +28,22 @@ function fetchFromApi($endpoint) {
         'Accept: application/json'
     ]);
     
+    // Helpful for testing locally in XAMPP where SSL certs might be missing
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    
     $response = curl_exec($ch);
+    
+    if ($response === false) {
+        $error = curl_error($ch);
+        curl_close($ch);
+        return ['error' => 'API Request Failed', 'details' => ['message' => 'cURL Error: ' . $error]];
+    }
+    
     $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
     
     if ($httpcode !== 200) {
-        return ['error' => 'API Request Failed', 'details' => json_decode($response, true)];
+        return ['error' => 'API Request Failed', 'details' => json_decode($response, true) ?? ['message' => "HTTP $httpcode Error"]];
     }
     
     return json_decode($response, true);

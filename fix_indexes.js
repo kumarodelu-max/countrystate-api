@@ -8,9 +8,9 @@ async function fixIndexes() {
         console.log('Creating index on api_logs(api_key)...');
         await db.query(`CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_api_logs_api_key ON api_logs(api_key);`);
 
-        // 2. Index on api_logs.user_id for rate limiting (already exists, but just in case)
-        console.log('Creating index on api_logs(user_id)...');
-        await db.query(`CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_api_logs_user_id ON api_logs(user_id);`);
+        // 2. Index on api_logs.user_id for rate limiting
+        console.log('Creating index on api_logs(user_id, created_at)...');
+        await db.query(`CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_api_logs_user_date ON api_logs(user_id, created_at DESC);`);
 
         // 3. Index on cities.state_id for fast city retrieval by state
         console.log('Creating index on cities(state_id)...');

@@ -272,15 +272,22 @@ const getUsage = async (req, res) => {
             getCount(todayKey, apiKey, 'day', req.userId),
             getCount(monthKey, apiKey, 'month', req.userId),
             db.query(
-                `SELECT COALESCE(AVG(latency_ms), 0) as avg_latency,
-                        SUM(CASE WHEN status_code >= 400 THEN 1 ELSE 0 END) as error_count
-                 FROM api_logs WHERE api_key = $1`,
-                [apiKey]
-            ),
+                `SELECT 
+                    ROUND(AVG(latency_ms), 2) as avg_latency,
+                    COUNT(CASE WHEN status_code >= 400 THEN 1 END) as error_count
+                 FROM (
+                     SELECT latency_ms, status_code
+                     FROM api_logs 
+                     WHERE user_id = $1 AND created_at >= $2
+                     ORDER BY created_at DESC
+                     LIMIT 1000
+                 ) as recent_logs`,
+                [req.userId, getStartOfPeriod('month')]
+            ).catch(() => ({ rows: [{ avg_latency: 0, error_count: 0 }] })),
             db.query(
                 `SELECT daily_limit, monthly_limit FROM plans WHERE code = $1 AND is_active = TRUE LIMIT 1`,
                 [plan]
-            )
+            ).catch(() => ({ rows: [] }))
         ]);
 
         const stats = statsResult.rows[0];
@@ -327,7 +334,7 @@ const getUsageHistory = async (req, res) => {
              ORDER BY created_at DESC 
              LIMIT 50`,
             [req.apiKey]
-        );
+        ).catch(() => ({ rows: [] }));
         
         res.json({
             status: 'success',

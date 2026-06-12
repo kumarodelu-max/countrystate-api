@@ -282,7 +282,7 @@ const getUsage = async (req, res) => {
                      ORDER BY created_at DESC
                      LIMIT 1000
                  ) as recent_logs`,
-                [req.userId, getStartOfPeriod('month')]
+                [req.userId, new Date(new Date().toISOString().slice(0, 7) + '-01').toISOString()]
             ).catch(() => ({ rows: [{ avg_latency: 0, error_count: 0 }] })),
             db.query(
                 `SELECT daily_limit, monthly_limit FROM plans WHERE code = $1 AND is_active = TRUE LIMIT 1`,

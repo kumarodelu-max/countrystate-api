@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Explicitly invite AI bots so they read the API docs
+User-agent: GPTBot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://countrystate.in/sitemap.xml

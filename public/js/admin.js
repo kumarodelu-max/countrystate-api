@@ -111,6 +111,10 @@ function renderUsers(users) {
         const pct   = Math.min(100, Math.round((usage / lim) * 100));
         const usageColor = pct >= 90 ? '#ef4444' : pct >= 70 ? '#f59e0b' : '#4ade80';
         const joined = u.created_at ? new Date(u.created_at).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'2-digit' }) : '–';
+        
+        const verifiedBadge = u.is_verified ? '<span style="color:#10b981; font-size:0.8rem;" title="Verified Email">✅</span>' : '<span style="color:#ef4444; font-size:0.8rem;" title="Email Not Verified">❌</span>';
+        const lastLogin = u.last_login_at ? new Date(u.last_login_at).toLocaleDateString('en-IN', { month:'short', day:'numeric' }) : 'Never';
+        const lastApi = u.last_api_use ? new Date(u.last_api_use).toLocaleDateString('en-IN', { month:'short', day:'numeric' }) : 'Never';
 
         return `<tr>
             <td>
@@ -123,7 +127,11 @@ function renderUsers(users) {
                 <span style="color:${usageColor}; font-weight:700;">${usage}</span>
                 <span style="color:#475569;"> / ${lim}</span>
             </td>
-            <td style="color:#334155;">${lim.toLocaleString()}</td>
+            <td style="font-size:0.75rem; color:#475569; line-height:1.4;">
+                ${verifiedBadge} <b>Verif</b><br>
+                🔑 In: <b>${lastLogin}</b><br>
+                🚀 API: <b>${lastApi}</b>
+            </td>
             <td><span class="badge ${u.user_active ? 'active' : 'inactive'}">${u.user_active ? 'Active' : 'Suspended'}</span></td>
             <td style="color:#475569; font-size:0.78rem;">${joined}</td>
             <td>

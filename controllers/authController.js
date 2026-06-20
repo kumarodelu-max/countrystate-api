@@ -152,6 +152,9 @@ const login = async (req, res) => {
             return res.status(401).json({ status: 'error', message: 'Invalid email or password.' });
         }
 
+        // Update last login timestamp
+        await db.query('UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = $1', [user.id]);
+
         // Fetch user's active API keys
         const keysResult = await db.query(
             `SELECT key_value, name, daily_limit, created_at, last_used_at 

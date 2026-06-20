@@ -11,7 +11,7 @@
 // 1. Configuration
 // ==========================================
 $api_base_url = 'https://countrystatecityapp.in/api/v1';
-$api_key      = 'cs_ccc1453ebb56551ac3767838226651655daaadcb050e14c2d3fc85be'; // Replace with an API key from your dashboard
+$api_key      = 'cs_41e99f3932ca979bffc30755bdc77c7639b20462823a84e81c185e45';
 
 // ==========================================
 // 2. Helper Function: Make API Request

@@ -4,7 +4,33 @@ This document serves as a complete, step-by-step reference guide for deploying t
 
 ---
 
-## 🛑 Phase 1: Infrastructure Setup (AWS & DNS)
+## ⚡ Quick Server Management (Cheat Sheet)
+
+If you have just updated code locally and want to push it to your live server, follow these 3 steps:
+
+### 1. Connect to AWS via SSH
+Open `cmd` (Command Prompt) in the folder where your `csc-key.pem` file is located, and run:
+```cmd
+ssh -i "csc-key.pem" ubuntu@15.207.82.84
+```
+*(Type `yes` if it asks if you want to continue connecting).*
+
+### 2. Pull Latest Code from GitHub
+Once you are logged into the AWS server, navigate to the project folder and pull the latest code:
+```bash
+cd /var/www/countrstate
+git pull origin master
+```
+
+### 3. Restart the API Server
+Restart the `pm2` process so your new code takes effect immediately:
+```bash
+pm2 restart countrstate
+```
+
+---
+
+## 🛠️ Phase 1: Infrastructure Setup (AWS & DNS)
 
 ### 1. Domain Configuration (Namecheap)
 * Domain `countrystatecityapp.in` registered.

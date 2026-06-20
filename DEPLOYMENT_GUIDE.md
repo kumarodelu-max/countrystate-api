@@ -22,10 +22,23 @@ cd /var/www/countrstate
 git pull origin master
 ```
 
-### 3. Restart the API Server
-Restart the `pm2` process so your new code takes effect immediately:
+### 3. Restart the API Server (Important)
+Because PM2 process names can vary depending on how you originally started it, you should always check the name of your running process first:
+
 ```bash
-pm2 restart countrstate
+# A. View all running processes and find your API's name under the "name" column
+pm2 list
+
+# B. Restart that exact process name (e.g. if it is named 'server' or 'app')
+pm2 restart <YOUR-PROCESS-NAME>
+```
+
+#### Troubleshooting PM2
+If you ever accidentally start two processes for the same API, you might get a port conflict. Run `pm2 list` to check. 
+If you see duplicates, delete the wrong one by running:
+```bash
+pm2 delete <WRONG-PROCESS-NAME>
+pm2 save
 ```
 
 ---

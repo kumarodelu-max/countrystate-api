@@ -61,7 +61,7 @@ router.post('/create-checkout-session', authenticate, async (req, res) => {
         }
 
         // --- LOCAL SANDBOX MODE (For sk_test_mock) ---
-        if (process.env.STRIPE_SECRET_KEY === 'sk_test_mock') {
+        if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === 'sk_test_mock' || process.env.STRIPE_SECRET_KEY.includes('mock')) {
             console.log('[Sandbox] Mocking successful payment and upgrading user locally...');
             
             // 1. Upgrade User

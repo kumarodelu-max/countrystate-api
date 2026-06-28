@@ -232,7 +232,90 @@ async function sendRatingEmail(toEmail, fullName) {
             </div>
         `,
     };
-    try { await transporter.sendMail(mailOptions); } catch (e) { console.error(e); }
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`✉️ Rating Request email sent to ${toEmail}`);
+    } catch (error) {
+        console.error('❌ Failed to send Rating Request email:', error);
+    }
+}
+
+/**
+ * Send Unverified Nudge Email (Day 5 - 0 API Calls - Not Verified)
+ */
+async function sendUnverifiedNudgeEmail(toEmail, token) {
+    if (!SMTP_USER) return;
+    const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
+    const verifyUrl = `${baseUrl}/?verify=${token}`;
+    const unsubscribeUrl = `${baseUrl}/api/auth/unsubscribe?email=${encodeURIComponent(toEmail)}`;
+
+    const mailOptions = {
+        from: `"Kumar Odelu" <${SMTP_USER}>`,
+        to: toEmail,
+        subject: 'Action Required: Your CountryState API Profile is Inactive',
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                <h2 style="color: #0f766e;">Profile Activation Pending</h2>
+                <p>Hi there,</p>
+                <p>I noticed you registered for the CountryState API a few days ago, but you haven't verified your email yet. As a result, your profile is completely inactive and you cannot make any API calls.</p>
+                <p>If you still want to use the API, simply click the button below to instantly verify your account and activate your profile:</p>
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="${verifyUrl}" style="background-color: #ea580c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Verify My Account</a>
+                </div>
+                <p>If you're having trouble, just reply to this email and I'll personally help you out.</p>
+                <p>Best regards,<br>Kumar Odelu<br>Founder, CountryState API</p>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
+                <p style="text-align: center; font-size: 12px; color: #999;">
+                    Don't want these check-ins? <a href="${unsubscribeUrl}" style="color: #999;">Unsubscribe here</a>.
+                </p>
+            </div>
+        `,
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`✉️ Unverified Nudge email sent to ${toEmail}`);
+    } catch (error) {
+        console.error('❌ Failed to send Unverified Nudge email:', error);
+    }
+}
+
+/**
+ * Send Inactive Help Email (Day 5 - 0 API Calls - Verified)
+ */
+async function sendInactiveHelpEmail(toEmail, userName) {
+    if (!SMTP_USER) return;
+    const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
+    const contactUrl = `${baseUrl}/contact.html`;
+    const unsubscribeUrl = `${baseUrl}/api/auth/unsubscribe?email=${encodeURIComponent(toEmail)}`;
+
+    const mailOptions = {
+        from: `"Kumar Odelu" <${SMTP_USER}>`,
+        to: toEmail,
+        subject: 'Are you stuck? I can help! (CountryState API)',
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                <h2 style="color: #0f766e;">Checking in!</h2>
+                <p>Hi ${userName},</p>
+                <p>Kumar here, the founder of the CountryState API. I noticed your profile is verified, but you still haven't made a single API call.</p>
+                <p>Are you facing any technical issues, or did you have trouble integrating the API into your app? I want to make sure you have everything you need to succeed.</p>
+                <p>If you're stuck, please don't hesitate to reach out! You can <a href="${contactUrl}">contact me here</a> or just reply directly to this email, and I will personally help you get set up.</p>
+                <p>Best regards,<br>Kumar Odelu</p>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
+                <p style="text-align: center; font-size: 12px; color: #999;">
+                    Don't want these check-ins? <a href="${unsubscribeUrl}" style="color: #999;">Unsubscribe here</a>.
+                </p>
+            </div>
+        `,
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`✉️ Inactive Help email sent to ${toEmail}`);
+    } catch (error) {
+        console.error('❌ Failed to send Inactive Help email:', error);
+    }
 }
 
 module.exports = {
@@ -242,5 +325,7 @@ module.exports = {
     sendAdminNewUserAlert,
     sendAdminContactMessage,
     sendFollowUpEmail,
-    sendRatingEmail
+    sendRatingEmail,
+    sendUnverifiedNudgeEmail,
+    sendInactiveHelpEmail
 };

@@ -28,10 +28,9 @@ router.post('/create-checkout-session', authenticate, async (req, res) => {
         }
 
         // Create Checkout Session
-        const session = await stripe.checkout.sessions.create({
+        const sessionPayload = {
             payment_method_types: ['card'],
             mode: 'subscription',
-            customer_email: req.userEmail, // Wait, auth middleware didn't set req.userEmail. Let's fix that later or omit it.
             client_reference_id: req.userId,
             metadata: {
                 plan_code: planCode,
@@ -55,13 +54,19 @@ router.post('/create-checkout-session', authenticate, async (req, res) => {
             ],
             success_url: `${req.protocol}://${req.get('host')}/?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${req.protocol}://${req.get('host')}/?checkout=canceled`,
-        });
+        };
+        
+        if (req.userEmail) {
+            sessionPayload.customer_email = req.userEmail;
+        }
+
+        const session = await stripe.checkout.sessions.create(sessionPayload);
 
         res.json({ status: 'success', url: session.url });
 
     } catch (err) {
-        console.error('[Stripe] Checkout Error:', err);
-        res.status(500).json({ status: 'error', message: 'Failed to create checkout session.' });
+        console.error('[Stripe] Checkout Error:', err.message || err);
+        res.status(500).json({ status: 'error', message: 'Failed to create checkout session. Error: ' + (err.message || 'Unknown') });
     }
 });
 

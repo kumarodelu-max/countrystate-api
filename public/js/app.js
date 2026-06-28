@@ -296,9 +296,17 @@ async function loadDynamicPlans(currentUserPlan) {
 }
 
 async function checkoutPlan(planCode, interval) {
-    const key = localStorage.getItem('cs_key');
-    if (!key) {
+    const userStr = localStorage.getItem('cs_user');
+    if (!userStr) {
         alert('Please log in first.');
+        return;
+    }
+    
+    const user = JSON.parse(userStr);
+    const key = user.api_keys && user.api_keys.length > 0 ? user.api_keys[0].key_value : user.api_key;
+    
+    if (!key) {
+        alert('Could not find your API key. Please log out and back in.');
         return;
     }
 

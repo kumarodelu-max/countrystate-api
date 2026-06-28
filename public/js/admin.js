@@ -118,27 +118,27 @@ function renderUsers(users) {
         const lastApi = u.last_api_use ? new Date(u.last_api_use).toLocaleDateString('en-IN', { month:'short', day:'numeric' }) : 'Never';
 
         return `<tr>
-            <td>
+            <td data-label="Name / Role">
                 <strong style="color:#0f172a;">${escHtml(u.full_name || '–')}</strong><br>
                 <span class="badge ${u.role === 'admin' ? 'adm' : ''}" style="margin-top:2px;">${u.role === 'admin' ? 'Admin' : 'User'}</span>
             </td>
-            <td style="color:#475569;">${escHtml(u.email)}</td>
-            <td><span class="badge ${plan}">${plan}</span></td>
-            <td style="font-size:0.85rem; line-height:1.4;">
+            <td data-label="Email" style="color:#475569;">${escHtml(u.email)}</td>
+            <td data-label="Plan"><span class="badge ${plan}">${plan}</span></td>
+            <td data-label="API Usage" style="font-size:0.85rem; line-height:1.4;">
                 <div style="color:#64748b; font-size:0.7rem; text-transform:uppercase;">Today</div>
                 <span style="color:${usageColor}; font-weight:700;">${usage}</span>
                 <span style="color:#475569;"> / ${lim}</span>
                 <div style="color:#64748b; font-size:0.7rem; text-transform:uppercase; margin-top:0.3rem;">Total</div>
                 <span style="font-weight:700; color:#334155;">${totalUsage}</span>
             </td>
-            <td style="font-size:0.75rem; color:#475569; line-height:1.4;">
+            <td data-label="Activity" style="font-size:0.75rem; color:#475569; line-height:1.4;">
                 ${verifiedBadge} <b>Verif</b><br>
                 🔑 In: <b>${lastLogin}</b><br>
                 🚀 API: <b>${lastApi}</b>
             </td>
-            <td><span class="badge ${u.user_active ? 'active' : 'inactive'}">${u.user_active ? 'Active' : 'Suspended'}</span></td>
-            <td style="color:#475569; font-size:0.78rem;">${joined}</td>
-            <td>
+            <td data-label="Status"><span class="badge ${u.user_active ? 'active' : 'inactive'}">${u.user_active ? 'Active' : 'Suspended'}</span></td>
+            <td data-label="Joined" style="color:#475569; font-size:0.78rem;">${joined}</td>
+            <td data-label="Actions">
                 <button class="btn-outline-sm" onclick="openLogsModal('${u.id}')">History</button>
                 <button class="btn-outline-sm" onclick="openEditModal('${u.id}','${plan}',${lim},${u.user_active},'${u.role}')">Edit</button>
                 <button class="btn-outline-sm" style="border-color:#ef4444; color:#ef4444;" onclick="confirmDelete('user', '${u.id}', '${escHtml(u.email)}')">Delete</button>
@@ -320,14 +320,14 @@ function renderPlans(plans) {
 
     tbody.innerHTML = plans.map(p => `
         <tr>
-            <td><strong style="color:#0f172a;">${escHtml(p.name)}</strong></td>
-            <td><code style="background:#f8fafc; padding:0.15rem 0.5rem; border-radius:0.3rem; font-size:0.78rem; border:1px solid rgba(0,0,0,0.1); color:#475569;">${p.code}</code></td>
-            <td style="color:#2563eb; font-weight:700;">${parseInt(p.daily_limit).toLocaleString()}</td>
-            <td style="color:#475569;">${parseInt(p.monthly_limit).toLocaleString()}</td>
-            <td style="color:#16a34a;">${parseFloat(p.price_monthly) === 0 ? 'Free' : '$' + parseFloat(p.price_monthly).toFixed(2)}</td>
-            <td style="color:#475569;">${parseFloat(p.price_yearly) === 0 ? '–' : '$' + parseFloat(p.price_yearly).toFixed(2)}</td>
-            <td><span class="badge ${p.is_active ? 'active' : 'inactive'}">${p.is_active ? 'Active' : 'Disabled'}</span></td>
-            <td>
+            <td data-label="Plan Name"><strong style="color:#0f172a;">${escHtml(p.name)}</strong></td>
+            <td data-label="Code"><code style="background:#f8fafc; padding:0.15rem 0.5rem; border-radius:0.3rem; font-size:0.78rem; border:1px solid rgba(0,0,0,0.1); color:#475569;">${p.code}</code></td>
+            <td data-label="Daily Limit" style="color:#2563eb; font-weight:700;">${parseInt(p.daily_limit).toLocaleString()}</td>
+            <td data-label="Monthly Limit" style="color:#475569;">${parseInt(p.monthly_limit).toLocaleString()}</td>
+            <td data-label="Price (Mo)" style="color:#16a34a;">${parseFloat(p.price_monthly) === 0 ? 'Free' : '$' + parseFloat(p.price_monthly).toFixed(2)}</td>
+            <td data-label="Price (Yr)" style="color:#475569;">${parseFloat(p.price_yearly) === 0 ? '–' : '$' + parseFloat(p.price_yearly).toFixed(2)}</td>
+            <td data-label="Status"><span class="badge ${p.is_active ? 'active' : 'inactive'}">${p.is_active ? 'Active' : 'Disabled'}</span></td>
+            <td data-label="Actions">
                 <button class="btn-outline-sm" onclick="openPlanModal('${p.id}')">Edit</button>
                 <button class="btn-outline-sm" style="border-color:#ef4444; color:#ef4444; margin-left:0.25rem;" onclick="confirmDelete('plan', '${p.id}', '${escHtml(p.name)}')">Delete</button>
             </td>
@@ -551,10 +551,10 @@ async function fetchUserLogs(page = currentLogsPage) {
                     
                     return `
                     <tr>
-                        <td style="color:#0f172a; font-weight:500;">${dt}</td>
-                        <td style="font-weight:700; color:${color};">${calls.toLocaleString()}</td>
-                        <td style="color:#475569; font-size:0.8rem;">/ ${lim.toLocaleString()} (${pct}%)</td>
-                        <td style="width:100px;">
+                        <td data-label="Date" style="color:#0f172a; font-weight:500;">${dt}</td>
+                        <td data-label="Calls" style="font-weight:700; color:${color};">${calls.toLocaleString()}</td>
+                        <td data-label="Limit / %" style="color:#475569; font-size:0.8rem;">/ ${lim.toLocaleString()} (${pct}%)</td>
+                        <td data-label="Usage Bar" style="width:100px;">
                             <div style="background:#e2e8f0; height:6px; border-radius:3px; overflow:hidden;">
                                 <div style="background:${color}; height:100%; width:${pct}%;"></div>
                             </div>

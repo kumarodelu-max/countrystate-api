@@ -17,10 +17,16 @@ function switchDashTab(tabId) {
         setTimeout(() => selectedTab.classList.add('active'), 10);
     }
     
-    // Highlight nav button
+    // Highlight nav button (desktop)
     const activeBtn = Array.from(document.querySelectorAll('.sidebar-nav .nav-item'))
         .find(btn => btn.getAttribute('onclick') === `switchDashTab('${tabId}')`);
     if (activeBtn) activeBtn.classList.add('active');
+    
+    // Highlight bottom nav button (mobile)
+    document.querySelectorAll('.bottom-nav .nav-item').forEach(btn => btn.classList.remove('active'));
+    const bottomActiveBtn = Array.from(document.querySelectorAll('.bottom-nav .nav-item'))
+        .find(btn => btn.getAttribute('onclick')?.includes(`switchDashTab('${tabId}')`));
+    if (bottomActiveBtn) bottomActiveBtn.classList.add('active');
     
     // Save state so refresh keeps you on the same tab
     localStorage.setItem('active_dash_tab', tabId);
@@ -386,10 +392,10 @@ function renderUsageHistoryTable() {
         }
         
         html += `<tr style="border-bottom: 1px solid var(--border-color);">
-                    <td style="padding: 0.75rem; font-size: 0.875rem;">${date}</td>
-                    <td style="padding: 0.75rem; font-family: monospace; font-size: 0.875rem; color: var(--accent-color);">${log.endpoint}</td>
-                    <td style="padding: 0.75rem; font-size: 0.875rem;">${statusBadge}</td>
-                    <td style="padding: 0.75rem; font-size: 0.875rem; color: var(--text-secondary);">${log.ip_address || 'Unknown'}</td>
+                    <td data-label="Date & Time (UTC)" style="padding: 0.75rem; font-size: 0.875rem;">${date}</td>
+                    <td data-label="Endpoint" style="padding: 0.75rem; font-family: monospace; font-size: 0.875rem; color: var(--accent-color);">${log.endpoint}</td>
+                    <td data-label="Status" style="padding: 0.75rem; font-size: 0.875rem;">${statusBadge}</td>
+                    <td data-label="IP Address" style="padding: 0.75rem; font-size: 0.875rem; color: var(--text-secondary);">${log.ip_address || 'Unknown'}</td>
                  </tr>`;
     });
     tbody.innerHTML = html;
@@ -679,3 +685,55 @@ document.addEventListener('DOMContentLoaded', () => {
         window.history.replaceState({}, document.title, window.location.pathname);
     }
 });
+
+// --- Support Form Handler --------------------------------------
+async function handleSupportSubmit(e) {
+    e.preventDefault();
+    
+    const subject = document.getElementById('support-subject').value;
+    const message = document.getElementById('support-message').value;
+    const btn = document.getElementById('support-submit-btn');
+    const err = document.getElementById('support-error');
+    const success = document.getElementById('support-success');
+    
+    err.style.display = 'none';
+    success.style.display = 'none';
+    
+    // Auto-fill from logged in user if available
+    let name = 'Dashboard User';
+    let email = 'unknown@user.com';
+    try {
+        const u = JSON.parse(localStorage.getItem('cs_user'));
+        if (u) {
+            name = u.full_name || name;
+            email = u.email || email;
+        }
+    } catch(e){}
+    
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    
+    try {
+        const res = await fetch('/api/v1/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, subject, message })
+        });
+        const data = await res.json();
+        
+        if (data.status === 'success') {
+            document.getElementById('support-form').reset();
+            success.textContent = 'Message sent successfully! We will get back to you soon.';
+            success.style.display = 'block';
+        } else {
+            err.textContent = data.message || 'Failed to send message.';
+            err.style.display = 'block';
+        }
+    } catch(e) {
+        err.textContent = 'Network error. Please try again.';
+        err.style.display = 'block';
+    }
+    
+    btn.disabled = false;
+    btn.textContent = 'Send Message';
+}

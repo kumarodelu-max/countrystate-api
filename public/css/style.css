@@ -365,6 +365,24 @@ h1, h2, h3 {
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
+.settings-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+}
+
+.settings-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .settings-grid { grid-template-columns: 1fr !important; gap: 1rem !important; }
+    .settings-form-grid { grid-template-columns: 1fr !important; gap: 1rem !important; }
+}
+
 .close-modal {
     position: absolute;
     top: 1rem; right: 1rem;
@@ -647,9 +665,16 @@ input:checked + .slider:before {
 }
 
 /* =========================================
-   Mobile Responsiveness
+   Native App Mobile Layout
    ========================================= */
+
+/* Hide bottom nav on desktop */
+.bottom-nav {
+    display: none;
+}
+
 @media (max-width: 1024px) {
+    /* Tablet keeps the sidebar but stacks it */
     .view.saas-layout {
         flex-direction: column;
         align-items: stretch;
@@ -692,22 +717,89 @@ input:checked + .slider:before {
 }
 
 @media (max-width: 768px) {
-    /* Navbar */
+    /* 1. App Header (Minimal) */
     .nav-container {
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .nav-links { display: none; } /* Hide bulky links */
+    .nav-auth .btn-outline { display: none; } /* Hide secondary buttons */
+    .nav-auth .btn-primary { padding: 0.5rem 1rem; font-size: 0.9rem; }
+
+    /* 2. Hide Desktop Sidebar */
+    .sidebar { display: none !important; }
+    
+    /* 3. Bottom Navigation Bar */
+    .bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid var(--border-color);
+        justify-content: space-around;
+        padding: 0.5rem 0;
+        padding-bottom: calc(0.5rem + env(safe-area-inset-bottom)); /* iOS safe area */
+        z-index: 1000;
+        box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+    }
+    .bottom-nav .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: none;
+        color: #64748b;
+        font-size: 0.75rem;
+        font-weight: 500;
+        gap: 0.25rem;
+        padding: 0.5rem;
+        width: 25%;
+    }
+    .bottom-nav .nav-item .icon { font-size: 1.25rem; margin-bottom: 2px; }
+    .bottom-nav .nav-item.active {
+        color: var(--accent-color);
+        font-weight: 700;
+    }
+    .bottom-nav .nav-item.active .icon { transform: scale(1.1); }
+
+    /* Fix body padding to prevent content from hiding under bottom nav */
+    body { padding-bottom: 80px; }
+    .dashboard-content { padding-bottom: 2rem; margin-top: 1rem; }
+
+    /* 4. Full Bleed / Grids */
+    .dashboard-container, .view.saas-layout { padding: 0.5rem; }
+    .dash-stats, .dashboard-cards, .pricing-grid, .feature-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem;
+    }
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    .dash-card { padding: 1.25rem; border-radius: 1rem; }
+    
+    .settings-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+    .settings-form-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+
+    .key-box {
         flex-direction: column;
         gap: 1rem;
-        padding: 1rem;
+        align-items: flex-start;
+        word-break: break-all;
     }
-    .nav-links {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 0.5rem;
-    }
-    .nav-links a { margin: 0 0.5rem; font-size: 0.9rem; }
-    .nav-auth { width: 100%; justify-content: center; }
-
-    /* Hero */
     .hero {
         grid-template-columns: 1fr;
         padding: 1.5rem;
@@ -718,47 +810,93 @@ input:checked + .slider:before {
     .hero p { font-size: 1rem; }
     .hero-actions { flex-direction: column; }
 
-    /* Dashboard & Admin */
-    .dash-stats, .dashboard-cards, .pricing-grid, .feature-grid {
-        grid-template-columns: 1fr;
-    }
-    .usage-stats {
-        flex-direction: column;
-        gap: 1rem;
-    }
-    .key-box {
-        flex-direction: column;
-        gap: 1rem;
-        align-items: flex-start;
-        word-break: break-all;
-    }
-    
-    /* Tables */
+    /* 5. Card-Based Tables (Native App Style) */
     .table-container, .admin-table-wrapper {
-        width: 100%;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        border: 1px solid var(--border-color);
-        border-radius: 0.5rem;
-        margin-bottom: 1rem;
-        padding-bottom: 0.5rem;
+        border: none;
+        background: transparent;
+        padding: 0;
+        box-shadow: none;
+        overflow: visible; /* Remove horizontal scroll */
     }
-    table {
-        min-width: 800px; /* Forces scroll on small screens */
+    table { min-width: 100%; border-collapse: separate; border-spacing: 0 1rem; }
+    thead { display: none; } /* Hide table headers */
+    tbody tr {
+        display: flex;
+        flex-direction: column;
+        background: var(--surface-color);
+        border: 1px solid var(--border-color);
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        margin-bottom: 1rem;
+        overflow: hidden;
+    }
+    tbody tr td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.9rem;
+    }
+    tbody tr td:last-child { border-bottom: none; }
+    tbody tr td::before {
+        content: attr(data-label); /* Uses data-label attribute for the row header */
+        font-weight: 600;
+        color: #64748b;
+        margin-right: 1rem;
     }
 
-    /* Modals */
-    .modal {
-        padding: 1.5rem;
-        width: 95%;
-        margin: 0 auto;
-    }
-    
-    /* Generic pages */
+    /* Modals & Footer */
+    .modal { padding: 1.5rem; width: 95%; margin: 0 auto; }
     .contact-container, .features, .pricing { padding: 1.5rem; }
-    
-    /* Footer */
     .footer-content, .footer-container { flex-direction: column; text-align: center; gap: 1rem; }
-    .footer-links { flex-wrap: wrap; }
 }
 
+/* =========================================
+   FAQ / Help Center Styles
+   ========================================= */
+.faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.faq-item {
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.faq-item:hover {
+    border-color: var(--accent-color);
+}
+.faq-question {
+    padding: 1.25rem;
+    background: #f8fafc;
+    font-weight: 600;
+    color: #1e293b;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.faq-answer {
+    padding: 0 1.25rem;
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    color: #475569;
+    line-height: 1.6;
+    background: white;
+}
+.faq-item.active .faq-answer {
+    padding: 1.25rem;
+    max-height: 500px;
+    border-top: 1px solid var(--border-color);
+}
+.faq-icon {
+    font-size: 0.8rem;
+    transition: transform 0.3s ease;
+}
+.faq-item.active .faq-icon {
+    transform: rotate(180deg);
+}

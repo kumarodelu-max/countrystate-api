@@ -170,7 +170,7 @@
                 <button class="nav-item" onclick="switchDashTab('usage')">📊 Analytics</button>
                 <button class="nav-item" onclick="switchDashTab('pricing')">💎 Subscription</button>
                 <button class="nav-item" onclick="switchDashTab('docs')">📖 Developer Guide</button>
-                <button class="nav-item" onclick="alert('Support portal coming soon!')">💬 Help Center</button>
+                <button class="nav-item" onclick="switchDashTab('help')">💬 Help Center</button>
                 <button class="nav-item" onclick="switchDashTab('settings')">⚙️ Preferences</button>
                 <button class="nav-item" id="nav-adhikari" style="display: none; background-color: rgba(234, 88, 12, 0.1); color: var(--accent-color); font-weight: bold; border: 1px solid var(--accent-color);" onclick="window.location.href='/adhikari.html'">👑 Adhikari (Admin)</button>
             </nav>
@@ -319,6 +319,70 @@
                 </div>
             </div>
 
+            <!-- Tab: Help Center -->
+            <div id="tab-help" class="dash-tab" style="display: none;">
+                <div class="dashboard-header" style="margin-bottom: 2rem;">
+                    <h2>Help Center & Knowledge Base 💬</h2>
+                    <p class="text-muted">Find answers to common questions or contact support.</p>
+                </div>
+
+                <div class="settings-grid">
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        <div class="dash-card">
+                            <div class="card-header" style="margin-bottom: 1.5rem;">
+                                <h3>Frequently Asked Questions</h3>
+                                <p class="text-sm text-muted">Click a question to reveal the answer.</p>
+                            </div>
+                            <div class="faq-list">
+                                <div class="faq-item" onclick="this.classList.toggle('active')">
+                                    <div class="faq-question">How do I authenticate my API requests? <span class="faq-icon">▼</span></div>
+                                    <div class="faq-answer">Pass your active API key in the Authorization header as a Bearer token: <br><code style="background:#f1f5f9; padding:0.2rem 0.4rem; border-radius:4px; display:inline-block; margin-top:0.5rem; color:#0f172a;">Authorization: Bearer YOUR_API_KEY</code></div>
+                                </div>
+                                <div class="faq-item" onclick="this.classList.toggle('active')">
+                                    <div class="faq-question">What happens if I hit my daily limit? <span class="faq-icon">▼</span></div>
+                                    <div class="faq-answer">If you exceed your daily limit, the API will return a 429 Too Many Requests status. Your limit resets automatically at midnight UTC. You can upgrade your plan to increase your limits immediately.</div>
+                                </div>
+                                <div class="faq-item" onclick="this.classList.toggle('active')">
+                                    <div class="faq-question">Are there rate limits per minute? <span class="faq-icon">▼</span></div>
+                                    <div class="faq-answer">Yes, to protect our infrastructure, all endpoints are rate-limited to 60 requests per minute per IP address, regardless of your plan's daily limit.</div>
+                                </div>
+                                <div class="faq-item" onclick="this.classList.toggle('active')">
+                                    <div class="faq-question">How often is the geographical data updated? <span class="faq-icon">▼</span></div>
+                                    <div class="faq-answer">Our underlying dataset is synced bi-weekly from the upstream open-source countries-states-cities database to ensure high accuracy.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="dash-card" style="background: linear-gradient(145deg, #fff, #fff6f2); border: 1px solid #fed7aa;">
+                            <div class="card-header" style="margin-bottom: 1.5rem;">
+                                <h3>Still need help?</h3>
+                                <p class="text-sm text-muted">Send us a message and we'll get back to you shortly.</p>
+                            </div>
+                            <form id="support-form" onsubmit="handleSupportSubmit(event)">
+                                <div class="form-group" style="margin-bottom: 1rem;">
+                                    <label style="display:block; font-size:0.875rem; font-weight:500; margin-bottom:0.5rem;">Subject</label>
+                                    <select id="support-subject" class="form-control w-100" style="padding:0.75rem; border:1px solid var(--border-color); border-radius:0.5rem;" required>
+                                        <option value="Billing Issue">Billing Issue</option>
+                                        <option value="Technical Support">Technical Support</option>
+                                        <option value="Feature Request">Feature Request</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 1.5rem;">
+                                    <label style="display:block; font-size:0.875rem; font-weight:500; margin-bottom:0.5rem;">Message</label>
+                                    <textarea id="support-message" class="form-control w-100" rows="4" style="padding:0.75rem; border:1px solid var(--border-color); border-radius:0.5rem; resize:vertical;" placeholder="Describe your issue in detail..." required></textarea>
+                                </div>
+                                <div class="form-error" id="support-error" style="display:none; color:#ef4444; margin-bottom:1rem; font-size:0.9rem;"></div>
+                                <div class="form-success" id="support-success" style="display:none; color:#10b981; margin-bottom:1rem; font-size:0.9rem; font-weight:500; padding:1rem; background:#dcfce7; border-radius:0.5rem;"></div>
+                                <button type="submit" class="btn btn-primary w-100" id="support-submit-btn">Send Message</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Tab: Settings -->
             <div id="tab-settings" class="dash-tab" style="display: none;">
                 <div class="settings-profile-header mb-2" style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
@@ -335,14 +399,14 @@
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+                <div class="settings-grid">
                     <!-- Personal Info -->
                     <div class="dash-card">
                         <div class="card-header" style="margin-bottom: 1.5rem;">
                             <h3 style="margin:0;">Personal Information</h3>
                             <p class="text-sm text-muted">Update your personal details</p>
                         </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                        <div class="settings-form-grid">
                             <div>
                                 <label style="display:block; font-size:0.875rem; margin-bottom:0.5rem; font-weight:500;">Full Name</label>
                                 <input type="text" id="settings-input-name" class="form-control w-100" style="padding:0.75rem; border:1px solid var(--border-color); border-radius:0.5rem;" value="">
@@ -575,6 +639,28 @@
             </form>
         </div>
     </div>
+    <!-- Mobile Menu Modal -->
+    <div id="mobileMenuModal" class="modal-overlay">
+        <div class="modal" style="padding: 1.5rem; max-width: 400px; width: 95%;">
+            <button class="close-modal" onclick="closeModal('mobileMenuModal')">&times;</button>
+            <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.75rem;">Menu</h2>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <button class="btn btn-outline w-100" style="justify-content: flex-start; font-size: 1.1rem; padding: 1rem; color: #1e293b; border-color: #e2e8f0;" onclick="closeModal('mobileMenuModal'); switchDashTab('pricing')">💎 Subscription Plans</button>
+                <button class="btn btn-outline w-100" style="justify-content: flex-start; font-size: 1.1rem; padding: 1rem; color: #1e293b; border-color: #e2e8f0;" onclick="closeModal('mobileMenuModal'); switchDashTab('docs')">📖 Developer Guide</button>
+                <button class="btn btn-outline w-100" style="justify-content: flex-start; font-size: 1.1rem; padding: 1rem; color: #1e293b; border-color: #e2e8f0;" onclick="closeModal('mobileMenuModal'); switchDashTab('settings')">⚙️ Preferences</button>
+                <button class="btn btn-outline w-100" style="justify-content: flex-start; font-size: 1.1rem; padding: 1rem; color: #1e293b; border-color: #e2e8f0;" onclick="closeModal('mobileMenuModal'); switchDashTab('help')">💬 Help Center</button>
+                <button class="btn btn-primary w-100 mt-2" style="font-size: 1.1rem; padding: 1rem;" onclick="logout()">🚪 Sign Out</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Mobile Bottom Nav -->
+    <nav class="bottom-nav" id="bottom-nav">
+        <button class="nav-item active" onclick="switchDashTab('overview')"><div class="icon">🏠</div><span>Hub</span></button>
+        <button class="nav-item" onclick="switchDashTab('keys')"><div class="icon">🔐</div><span>Keys</span></button>
+        <button class="nav-item" onclick="switchDashTab('usage')"><div class="icon">📊</div><span>Stats</span></button>
+        <button class="nav-item" onclick="openModal('mobileMenuModal')"><div class="icon">☰</div><span>Menu</span></button>
+    </nav>
 
     <script src="/js/app.js?v=2.0.1"></script>
 </body>

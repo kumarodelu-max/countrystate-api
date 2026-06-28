@@ -107,6 +107,30 @@ async function checkAuth() {
     }
 
     const user = JSON.parse(localStorage.getItem('cs_user'));
+    
+    // Check for Stripe Checkout success
+    const checkoutStatus = urlParams.get('checkout');
+    const sessionId = urlParams.get('session_id');
+    if (checkoutStatus === 'success' && sessionId && user) {
+        try {
+            const apiKey = user.api_keys && user.api_keys.length > 0 ? user.api_keys[0].key_value : user.api_key;
+            const res = await fetch(`/api/payments/verify-session?session_id=${sessionId}`, {
+                headers: { 'Authorization': 'Bearer ' + apiKey }
+            });
+            const data = await res.json();
+            if (data.status === 'success') {
+                window.history.replaceState({}, document.title, window.location.pathname);
+                const banner = document.createElement('div');
+                banner.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#10b981;color:white;padding:1rem 2rem;border-radius:8px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-weight:600;';
+                banner.textContent = 'Payment successful! Your plan has been upgraded.';
+                document.body.appendChild(banner);
+                setTimeout(() => banner.remove(), 4000);
+            }
+        } catch (e) {
+            console.error('Failed to verify checkout', e);
+        }
+    }
+
     if (user && (user.api_key || (user.api_keys && user.api_keys.length > 0))) {
         showView('dashboard');
         // Always fetch fresh plan/limit data from server

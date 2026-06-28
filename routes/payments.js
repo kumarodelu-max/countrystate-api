@@ -99,12 +99,74 @@ router.post('/create-checkout-session', authenticate, async (req, res) => {
         res.json({ status: 'success', url: session.url });
 
     } catch (err) {
-        console.error('[Stripe] Checkout Error:', err.message || err);
-        res.status(500).json({ status: 'error', message: 'Failed to create checkout session. Error: ' + (err.message || 'Unknown') });
+        console.error('Checkout error:', err);
+        return res.status(500).json({ status: 'error', message: 'Internal server error during checkout.' });
     }
 });
 
-// ─── 2. Stripe Webhook ──────────────────────────────────────────
+// ─── 1.5 Verify Session (Fallback for Localhost/Delayed Webhooks) ───
+router.get('/verify-session', authenticate, async (req, res) => {
+    try {
+        const { session_id } = req.query;
+        if (!session_id) return res.status(400).json({ status: 'error', message: 'Missing session ID.' });
+
+        const session = await stripe.checkout.sessions.retrieve(session_id);
+        if (session.payment_status !== 'paid') {
+            return res.json({ status: 'pending', message: 'Payment not completed.' });
+        }
+
+        const userId = session.client_reference_id;
+        const planCode = session.metadata.plan_code;
+        const interval = session.metadata.interval;
+        const customerId = session.customer;
+        const subscriptionId = session.subscription;
+
+        if (userId && planCode) {
+            const planRes = await db.query('SELECT * FROM plans WHERE code = $1', [planCode]);
+            if (planRes.rows.length > 0) {
+                const plan = planRes.rows[0];
+                
+                // Update User
+                await db.query(`
+                    UPDATE users 
+                    SET plan = $1, stripe_customer_id = $2, stripe_subscription_id = $3,
+                        plan_starts_at = NOW(), plan_expires_at = NOW() + INTERVAL '1 ${interval === 'yearly' ? 'year' : 'month'}'
+                    WHERE id = $4
+                `, [planCode, customerId, subscriptionId, userId]);
+
+                // Update API Key limit
+                await db.query(`
+                    UPDATE api_keys SET daily_limit = $1 WHERE user_id = $2 AND is_active = true
+                `, [plan.daily_limit, userId]);
+
+                // Insert Payment Record
+                const insertRes = await db.query(`
+                    INSERT INTO payments (user_id, stripe_session_id, stripe_customer_id, plan_code, amount, currency, status)
+                    VALUES ($1, $2, $3, $4, $5, $6, 'paid')
+                    ON CONFLICT (stripe_session_id) DO NOTHING
+                    RETURNING id
+                `, [userId, session.id, customerId, planCode, session.amount_total / 100, session.currency]);
+
+                // If this is the first time we've seen this payment, send email
+                if (insertRes.rowCount > 0) {
+                    console.log(`[Stripe Verify] Upgraded user ${userId} to ${planCode}`);
+                    try {
+                        const userRes = await db.query('SELECT email FROM users WHERE id = $1', [userId]);
+                        if (userRes.rows.length > 0) {
+                            await sendAdminPaymentAlert(userRes.rows[0].email, plan.name, (session.amount_total / 100).toFixed(2), session.currency);
+                        }
+                    } catch (e) {}
+                }
+            }
+        }
+        return res.json({ status: 'success', message: 'Payment verified and applied.' });
+    } catch (err) {
+        console.error('Verify session error:', err);
+        return res.status(500).json({ status: 'error', message: 'Failed to verify session.' });
+    }
+});
+
+// ─── 2. Stripe Webhook (Async Updates) ──────────────────────────────────────────
 // Webhooks must use express.raw({type: 'application/json'}) before parsing,
 // but since we globally apply express.json() in server.js, we must handle it there or verify signature carefully.
 // To bypass express.json() for webhooks, it's usually defined BEFORE express.json() in server.js.

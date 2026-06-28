@@ -39,8 +39,8 @@ app.get('/api/health', (req, res) => {
 
 // ─── Routes ───────────────────────────────────────────
 app.use('/api/auth',  require('./routes/auth'));
-app.use('/api/v1',    require('./routes/geo'));
 app.use('/api/v1/contact', require('./routes/contact'));
+app.use('/api/v1',    require('./routes/geo'));
 app.use('/api/admin', require('./routes/admin'));
 
 // ─── 404 Handler ──────────────────────────────────────

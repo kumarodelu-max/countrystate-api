@@ -60,6 +60,39 @@ router.post('/create-checkout-session', authenticate, async (req, res) => {
             sessionPayload.customer_email = req.userEmail;
         }
 
+        // --- LOCAL SANDBOX MODE (For sk_test_mock) ---
+        if (process.env.STRIPE_SECRET_KEY === 'sk_test_mock') {
+            console.log('[Sandbox] Mocking successful payment and upgrading user locally...');
+            
+            // 1. Upgrade User
+            await db.query(`
+                UPDATE users 
+                SET plan = $1, 
+                    stripe_customer_id = 'cus_mock_123', 
+                    stripe_subscription_id = 'sub_mock_123',
+                    plan_starts_at = NOW(),
+                    plan_expires_at = NOW() + INTERVAL '1 ${interval === 'yearly' ? 'year' : 'month'}'
+                WHERE id = $2
+            `, [planCode, req.userId]);
+
+            // 2. Upgrade Limits
+            await db.query(`
+                UPDATE api_keys 
+                SET daily_limit = $1 
+                WHERE user_id = $2 AND is_active = true
+            `, [plan.daily_limit, req.userId]);
+
+            // 3. Record fake payment
+            await db.query(`
+                INSERT INTO payments (user_id, stripe_session_id, stripe_customer_id, plan_code, amount, currency, status)
+                VALUES ($1, $2, $3, $4, $5, $6, 'paid')
+                ON CONFLICT (stripe_session_id) DO NOTHING
+            `, [req.userId, 'cs_test_mock_' + Date.now(), 'cus_mock_123', planCode, price, 'usd']);
+
+            return res.json({ status: 'success', url: sessionPayload.success_url.replace('{CHECKOUT_SESSION_ID}', 'cs_test_mock_123') });
+        }
+        // ----------------------------------------------
+
         const session = await stripe.checkout.sessions.create(sessionPayload);
 
         res.json({ status: 'success', url: session.url });

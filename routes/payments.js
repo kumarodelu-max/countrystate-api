@@ -14,8 +14,8 @@ const razorpay = new Razorpay({
 // Mock Plans Mapping for Local Testing
 // In real life, these would be created in the Razorpay Dashboard.
 const RAZORPAY_PLAN_MAP = {
-    'starter_monthly': 'plan_starter_monthly',
-    'starter_yearly': 'plan_starter_yearly',
+    'starter_monthly': 'plan_T7ABVQzZOkv6yw',
+    'starter_yearly': 'plan_T7ADlThxObSlhW',
     'supporter_monthly': 'plan_supporter_monthly',
     'supporter_yearly': 'plan_supporter_yearly',
     'professional_monthly': 'plan_professional_monthly',

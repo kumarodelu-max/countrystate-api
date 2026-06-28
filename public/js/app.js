@@ -104,32 +104,7 @@ async function checkAuth() {
         } catch (err) {
             console.error(err);
         }
-    }
-
     const user = JSON.parse(localStorage.getItem('cs_user'));
-    
-    // Check for Stripe Checkout success
-    const checkoutStatus = urlParams.get('checkout');
-    const sessionId = urlParams.get('session_id');
-    if (checkoutStatus === 'success' && sessionId && user) {
-        try {
-            const apiKey = user.api_keys && user.api_keys.length > 0 ? user.api_keys[0].key_value : user.api_key;
-            const res = await fetch(`/api/payments/verify-session?session_id=${sessionId}`, {
-                headers: { 'Authorization': 'Bearer ' + apiKey }
-            });
-            const data = await res.json();
-            if (data.status === 'success') {
-                window.history.replaceState({}, document.title, window.location.pathname);
-                const banner = document.createElement('div');
-                banner.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#10b981;color:white;padding:1rem 2rem;border-radius:8px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-weight:600;';
-                banner.textContent = 'Payment successful! Your plan has been upgraded.';
-                document.body.appendChild(banner);
-                setTimeout(() => banner.remove(), 4000);
-            }
-        } catch (e) {
-            console.error('Failed to verify checkout', e);
-        }
-    }
 
     if (user && (user.api_key || (user.api_keys && user.api_keys.length > 0))) {
         showView('dashboard');
@@ -369,32 +344,90 @@ function renderPricingGrid(plans, currentUserPlan) {
 async function checkoutPlan(planCode, interval) {
     const userStr = localStorage.getItem('cs_user');
     if (!userStr) {
-        alert('Please log in first.');
+        alert('Please login first.');
         return;
     }
-    
     const user = JSON.parse(userStr);
-    const key = user.api_keys && user.api_keys.length > 0 ? user.api_keys[0].key_value : user.api_key;
-    
-    if (!key) {
-        alert('Could not find your API key. Please log out and back in.');
-        return;
-    }
+    const apiKey = user.api_keys && user.api_keys.length > 0 ? user.api_keys[0].key_value : user.api_key;
 
     try {
-        const res = await fetch('/api/payments/create-checkout-session', {
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner"></span> Processing...';
+        btn.disabled = true;
+
+        // 1. Call our backend to create a Razorpay Subscription
+        const res = await fetch('/api/payments/create-subscription', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${key}`
+                'Authorization': 'Bearer ' + apiKey
             },
             body: JSON.stringify({ planCode, interval })
         });
-        
         const data = await res.json();
-        if (data.status === 'success' && data.url) {
-            window.location.href = data.url; // Redirect to Stripe
+
+        if (data.status === 'success') {
+            // 2. Open the Razorpay Payment Modal
+            const options = {
+                key: data.key_id, 
+                subscription_id: data.subscription_id,
+                name: 'CountryState API',
+                description: `Upgrade to ${planCode.toUpperCase()} Plan`,
+                image: 'https://cdn-icons-png.flaticon.com/512/8042/8042261.png',
+                handler: async function (response) {
+                    // 3. Razorpay returns success, send signature to our backend to verify
+                    try {
+                        const verifyRes = await fetch('/api/payments/verify-subscription', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer ' + apiKey
+                            },
+                            body: JSON.stringify({
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_subscription_id: response.razorpay_subscription_id,
+                                razorpay_signature: response.razorpay_signature,
+                                planCode: planCode,
+                                interval: interval
+                            })
+                        });
+                        const verifyData = await verifyRes.json();
+                        if (verifyData.status === 'success') {
+                            const banner = document.createElement('div');
+                            banner.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#10b981;color:white;padding:1rem 2rem;border-radius:8px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-weight:600;';
+                            banner.textContent = 'Payment successful! Your plan has been upgraded.';
+                            document.body.appendChild(banner);
+                            setTimeout(() => banner.remove(), 4000);
+                            
+                            checkAuth(); // Refresh dashboard
+                        } else {
+                            alert('Verification failed: ' + verifyData.message);
+                        }
+                    } catch (e) {
+                        alert('Error verifying payment.');
+                    }
+                },
+                prefill: {
+                    name: user.full_name,
+                    email: user.email
+                },
+                theme: {
+                    color: '#6366f1'
+                }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.on('payment.failed', function (response){
+                alert('Payment failed. Reason: ' + response.error.description);
+            });
+            rzp.open();
+            
+            btn.innerHTML = originalText;
+            btn.disabled = false;
         } else {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
             alert('Checkout failed: ' + (data.message || 'Unknown error'));
         }
     } catch (err) {

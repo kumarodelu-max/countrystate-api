@@ -187,8 +187,10 @@ function populateDashboard(user) {
     document.getElementById('settings-email').textContent = user.email;
     document.getElementById('settings-plan-badge').textContent = planName + ' Plan';
     
-    document.getElementById('settings-alert-usage').checked = user.alert_usage !== false;
-    document.getElementById('settings-alert-updates').checked = user.alert_updates !== false;  
+    const usageAlert = document.getElementById('settings-alert-usage');
+    if (usageAlert) usageAlert.checked = user.alert_usage !== false;
+    const updatesAlert = document.getElementById('settings-alert-updates');
+    if (updatesAlert) updatesAlert.checked = user.alert_updates !== false;
     // API Key handling
     const apiKeyDisplay = document.getElementById('api-key-display');
     if(apiKeyDisplay) apiKeyDisplay.textContent = currentKey || 'No active keys';

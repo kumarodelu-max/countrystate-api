@@ -107,6 +107,7 @@ function renderUsers(users) {
     tbody.innerHTML = users.map(u => {
         const plan  = u.plan || 'free';
         const usage = parseInt(u.used_today) || 0;
+        const totalUsage = parseInt(u.total_used) || 0;
         const lim   = parseInt(u.daily_limit) || 100;
         const pct   = Math.min(100, Math.round((usage / lim) * 100));
         const usageColor = pct >= 90 ? '#ef4444' : pct >= 70 ? '#f59e0b' : '#4ade80';
@@ -123,9 +124,12 @@ function renderUsers(users) {
             </td>
             <td style="color:#475569;">${escHtml(u.email)}</td>
             <td><span class="badge ${plan}">${plan}</span></td>
-            <td>
+            <td style="font-size:0.85rem; line-height:1.4;">
+                <div style="color:#64748b; font-size:0.7rem; text-transform:uppercase;">Today</div>
                 <span style="color:${usageColor}; font-weight:700;">${usage}</span>
                 <span style="color:#475569;"> / ${lim}</span>
+                <div style="color:#64748b; font-size:0.7rem; text-transform:uppercase; margin-top:0.3rem;">Total</div>
+                <span style="font-weight:700; color:#334155;">${totalUsage}</span>
             </td>
             <td style="font-size:0.75rem; color:#475569; line-height:1.4;">
                 ${verifiedBadge} <b>Verif</b><br>

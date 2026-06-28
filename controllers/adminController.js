@@ -24,6 +24,7 @@ const getUsers = async (req, res) => {
                 u.is_active as user_active, u.created_at, u.is_verified, u.last_login_at,
                 ak.key_value, ak.daily_limit, ak.is_active as key_active,
                 (SELECT COUNT(*) FROM api_logs al WHERE al.api_key = ak.key_value AND al.created_at >= CURRENT_DATE) as used_today,
+                (SELECT COUNT(*) FROM api_logs al WHERE al.api_key = ak.key_value) as total_used,
                 (SELECT MAX(created_at) FROM api_logs al WHERE al.api_key = ak.key_value) as last_api_use
             FROM users u
             LEFT JOIN api_keys ak ON ak.user_id = u.id

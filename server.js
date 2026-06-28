@@ -14,11 +14,13 @@ app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://checkout.razorpay.com", "https://challenges.cloudflare.com"],
             scriptSrcAttr: ["'unsafe-inline'"],
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com"],
-            imgSrc: ["'self'", "data:"]
+            imgSrc: ["'self'", "data:", "https://cdn-icons-png.flaticon.com", "https://badges.razorpay.com"],
+            frameSrc: ["'self'", "https://challenges.cloudflare.com", "https://api.razorpay.com"],
+            connectSrc: ["'self'", "https://api.razorpay.com", "https://lumberjack.razorpay.com"]
         }
     }
 }));

@@ -104,6 +104,7 @@ async function checkAuth() {
         } catch (err) {
             console.error(err);
         }
+    }
     const user = JSON.parse(localStorage.getItem('cs_user'));
 
     if (user && (user.api_key || (user.api_keys && user.api_keys.length > 0))) {

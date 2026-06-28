@@ -4,6 +4,7 @@ const path    = require('path');
 const cors    = require('cors');
 const helmet  = require('helmet');
 const { startEmailJobs } = require('./cron/emailJobs');
+const { startExpirationJobs } = require('./cron/checkExpirations');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -22,6 +23,10 @@ app.use(helmet({
     }
 }));
 app.use(cors());
+
+// Stripe Webhooks MUST be parsed as raw body BEFORE express.json() intercepts it
+app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
+
 app.use(express.json());
 
 // Serve frontend website
@@ -42,6 +47,7 @@ app.use('/api/auth',  require('./routes/auth'));
 app.use('/api/v1/contact', require('./routes/contact'));
 app.use('/api/v1',    require('./routes/geo'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/payments', require('./routes/payments'));
 
 // ─── 404 Handler ──────────────────────────────────────
 app.use((req, res) => {
@@ -68,4 +74,5 @@ app.listen(PORT, () => {
     
     // Start automated email jobs
     startEmailJobs();
+    startExpirationJobs();
 });

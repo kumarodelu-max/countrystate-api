@@ -24,6 +24,7 @@
     "node-cron": "^4.5.0",
     "nodemailer": "^8.0.9",
     "pg": "^8.21.0",
+    "stripe": "^22.3.0",
     "uuid": "^14.0.0"
   },
   "devDependencies": {

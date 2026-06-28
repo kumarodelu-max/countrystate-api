@@ -140,6 +140,22 @@ function populateDashboard(user) {
     // Sidebar
     document.getElementById('dash-name').textContent = fullName;
     document.getElementById('plan-display').textContent = planName;
+    document.getElementById('overview-plan').textContent = planName;
+
+    // Plan Dates Logic
+    const datesEl = document.getElementById('plan-dates');
+    const upgradePrompt = document.getElementById('plan-upgrade-prompt');
+    if (userPlan !== 'free' && user.plan_starts_at && user.plan_expires_at) {
+        datesEl.style.display = 'block';
+        upgradePrompt.style.display = 'none';
+        
+        const opts = { year: 'numeric', month: 'short', day: 'numeric' };
+        document.getElementById('plan-start-date').textContent = new Date(user.plan_starts_at).toLocaleDateString(undefined, opts);
+        document.getElementById('plan-expire-date').textContent = new Date(user.plan_expires_at).toLocaleDateString(undefined, opts);
+    } else {
+        datesEl.style.display = 'none';
+        upgradePrompt.style.display = 'block';
+    }
 
     // Admin Button
     const adminBtn = document.getElementById('nav-adhikari');
@@ -267,7 +283,7 @@ async function loadDynamicPlans(currentUserPlan) {
                 <div style="margin-top:1.25rem;">
                     ${isCurrent
                         ? '<div style="text-align:center;font-size:0.8rem;color:#10b981;font-weight:700;">\u2713 Active Plan</div>'
-                        : `<button class="btn btn-${isFree ? 'outline' : 'primary'} w-100" style="font-size:0.85rem;" onclick="alert('Upgrade to ${p.name} — payment coming soon!')">Upgrade</button>`
+                        : `<button class="btn btn-${isFree ? 'outline' : 'primary'} w-100" style="font-size:0.85rem;" onclick="${isFree ? '' : `checkoutPlan('${p.code}', 'monthly')`}">Upgrade</button>`
                     }
                 </div>
             </div>`;
@@ -276,6 +292,35 @@ async function loadDynamicPlans(currentUserPlan) {
     } catch (err) {
         console.error('Failed to load plans:', err);
         if (grid) grid.innerHTML = '<div style="text-align:center;padding:3rem;color:#ef4444;">Could not load plans. Please refresh.</div>';
+    }
+}
+
+async function checkoutPlan(planCode, interval) {
+    const key = localStorage.getItem('cs_key');
+    if (!key) {
+        alert('Please log in first.');
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/payments/create-checkout-session', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${key}`
+            },
+            body: JSON.stringify({ planCode, interval })
+        });
+        
+        const data = await res.json();
+        if (data.status === 'success' && data.url) {
+            window.location.href = data.url; // Redirect to Stripe
+        } else {
+            alert('Checkout failed: ' + (data.message || 'Unknown error'));
+        }
+    } catch (err) {
+        console.error('Checkout error:', err);
+        alert('An error occurred during checkout. Please try again.');
     }
 }
 

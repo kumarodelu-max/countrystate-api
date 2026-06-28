@@ -365,6 +365,7 @@ const getMe = async (req, res) => {
             `SELECT
                 u.id, u.full_name, u.email, u.plan, u.role, u.is_active,
                 u.alert_usage, u.alert_updates, u.created_at,
+                u.plan_starts_at, u.plan_expires_at,
                 json_agg(
                     json_build_object(
                         'key_value', ak.key_value,

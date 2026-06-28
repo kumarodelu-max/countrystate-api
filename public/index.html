@@ -204,12 +204,19 @@
                 </div>
                 
                 <div class="dashboard-cards" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 2rem;">
-                    <div class="dash-card" style="padding: 1.5rem;">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <p class="stat-label">Current Plan</p>
-                            <span style="font-size:1.5rem">💳</span>
+                    <div class="stat-card" style="position: relative; overflow: hidden; padding: 1.5rem;">
+                        <div style="position: absolute; top: -10px; right: -10px; opacity: 0.1; font-size: 5rem;">👑</div>
+                        <p class="stat-label">Current Plan</p>
+                        <div style="display: flex; align-items: baseline; gap: 0.5rem;">
+                            <h3 style="font-size: 1.5rem; margin-top:0.5rem;" id="overview-plan">Free</h3>
                         </div>
-                        <h3 style="font-size: 1.5rem; margin-top:0.5rem;" id="overview-plan">Free</h3>
+                        <div id="plan-dates" style="display: none; margin-top: 0.5rem; font-size: 0.75rem; color: #64748b;">
+                            <div style="margin-bottom: 0.2rem;">Upgraded: <strong id="plan-start-date" style="color: #475569;"></strong></div>
+                            <div>Renews: <strong id="plan-expire-date" style="color: #475569;"></strong></div>
+                        </div>
+                        <div id="plan-upgrade-prompt" style="margin-top: 0.75rem;">
+                            <button class="btn btn-primary w-100" style="font-size: 0.8rem; padding: 0.4rem;" onclick="switchDashTab('pricing')">Upgrade Plan ⚡</button>
+                        </div>
                     </div>
                     <div class="dash-card" style="padding: 1.5rem;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">

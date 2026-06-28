@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY || 'sk_test_mock');
 const db = require('../config/db');
+const { sendAdminPaymentAlert } = require('../utils/email');
 const authenticate = require('../middleware/auth');
 
 // ─── 1. Create Checkout Session ─────────────────────────────────
@@ -162,6 +163,19 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
                     `, [userId, session.id, customerId, planCode, session.amount_total / 100, session.currency]);
 
                     console.log(`[Stripe] Successfully upgraded user ${userId} to ${planCode}`);
+                    
+                    // Email Admin
+                    try {
+                        const userRes = await db.query('SELECT email FROM users WHERE id = $1', [userId]);
+                        if (userRes.rows.length > 0) {
+                            await sendAdminPaymentAlert(
+                                userRes.rows[0].email, 
+                                plan.name, 
+                                (session.amount_total / 100).toFixed(2), 
+                                session.currency
+                            );
+                        }
+                    } catch (e) { console.error('Failed to send admin payment alert', e); }
                 }
             } catch (dbErr) {
                 console.error('[Stripe DB Error]', dbErr);

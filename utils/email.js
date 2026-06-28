@@ -150,6 +150,30 @@ async function sendAdminNewUserAlert(userEmail, fullName) {
 }
 
 /**
+ * Send Admin Alert on Successful Payment
+ */
+async function sendAdminPaymentAlert(userEmail, planName, amount, currency) {
+    if (!SMTP_USER) return;
+    
+    const mailOptions = {
+        from: `"CountryStateAPI Billing" <${SMTP_USER}>`,
+        to: 'kumar.odelu@gmail.com',
+        subject: `💰 New Payment Received: $${amount} for ${planName}`,
+        html: `
+            <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #10b981; border-radius: 8px;">
+                <h3 style="color: #10b981;">Cha-Ching! New Subscription Payment! 🎉</h3>
+                <p><strong>User Email:</strong> ${userEmail}</p>
+                <p><strong>Plan Purchased:</strong> ${planName}</p>
+                <p><strong>Amount Paid:</strong> ${amount} ${currency.toUpperCase()}</p>
+                <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
+                <hr style="border:1px solid #eee; margin:20px 0;"/>
+                <p style="font-size: 12px; color: #666;">This user's token limits and plan have been automatically upgraded in the database.</p>
+            </div>
+        `,
+    };
+    try { await transporter.sendMail(mailOptions); } catch (e) { console.error(e); }
+}
+/**
  * Send Admin Alert for Contact Us Query
  */
 async function sendAdminContactMessage(name, userEmail, message) {
@@ -326,6 +350,8 @@ module.exports = {
     sendAdminContactMessage,
     sendFollowUpEmail,
     sendRatingEmail,
+    sendRatingEmail,
     sendUnverifiedNudgeEmail,
-    sendInactiveHelpEmail
+    sendInactiveHelpEmail,
+    sendAdminPaymentAlert
 };

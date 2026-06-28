@@ -241,10 +241,42 @@ function logout() {
     window.location.reload();
 }
 
-// ─── Dynamic Plans ────────────────────────────────────────────────
+let currentBillingInterval = 'monthly';
+
+function toggleBilling() {
+    const isYearly = document.getElementById('billing-interval-toggle').checked;
+    currentBillingInterval = isYearly ? 'yearly' : 'monthly';
+    
+    const slider = document.getElementById('billing-slider');
+    const mLabel = document.getElementById('billing-monthly-label');
+    const yLabel = document.getElementById('billing-yearly-label');
+    
+    if (isYearly) {
+        slider.style.transform = 'translateX(24px)';
+        slider.parentNode.style.backgroundColor = 'var(--accent-color)';
+        mLabel.style.fontWeight = '500';
+        mLabel.style.color = '#94a3b8';
+        yLabel.style.fontWeight = '700';
+        yLabel.style.color = '#1e293b';
+    } else {
+        slider.style.transform = 'translateX(0)';
+        slider.parentNode.style.backgroundColor = '#e2e8f0';
+        mLabel.style.fontWeight = '700';
+        mLabel.style.color = '#1e293b';
+        yLabel.style.fontWeight = '500';
+        yLabel.style.color = '#94a3b8';
+    }
+    
+    if (window.apiPlans) {
+        renderPricingGrid(window.apiPlans, window.currentUserPlanCode);
+    }
+}
+
 async function loadDynamicPlans(currentUserPlan) {
     const grid = document.getElementById('pricing-grid');
     if (!grid) return;
+    
+    window.currentUserPlanCode = currentUserPlan;
 
     try {
         const res  = await fetch('/api/auth/plans');
@@ -254,20 +286,40 @@ async function loadDynamicPlans(currentUserPlan) {
             return;
         }
 
-        const plans = data.data;
-        const midIdx = Math.floor(plans.length / 2);
-        grid.style.gridTemplateColumns = `repeat(${Math.min(plans.length, 3)}, 1fr)`;
+        window.apiPlans = data.data;
+        renderPricingGrid(window.apiPlans, currentUserPlan);
+    } catch (err) {
+        console.error('Failed to load plans:', err);
+        if (grid) grid.innerHTML = '<div style="text-align:center;padding:3rem;color:#ef4444;">Could not load plans. Please refresh.</div>';
+    }
+}
 
-        grid.innerHTML = plans.map((p, i) => {
-            const isFree    = parseFloat(p.price_monthly) === 0;
-            const isPopular = i === midIdx && plans.length > 2;
-            const isCurrent = p.code === currentUserPlan;
-            const priceHtml = isFree
-                ? 'Free'
-                : `\$${parseFloat(p.price_monthly).toFixed(0)}<span class="interval">/mo</span>`;
-            const yearlySaving = parseFloat(p.price_yearly) > 0
-                ? Math.round((1 - (parseFloat(p.price_yearly) / (parseFloat(p.price_monthly) * 12))) * 100)
-                : 0;
+function renderPricingGrid(plans, currentUserPlan) {
+    const grid = document.getElementById('pricing-grid');
+    if (!grid) return;
+
+    const midIdx = Math.floor(plans.length / 2);
+    grid.style.gridTemplateColumns = `repeat(${Math.min(plans.length, 3)}, 1fr)`;
+
+    grid.innerHTML = plans.map((p, i) => {
+        const isFree    = parseFloat(p.price_monthly) === 0;
+        const isPopular = i === midIdx && plans.length > 2;
+        const isCurrent = p.code === currentUserPlan;
+        
+        let displayPrice = p.price_monthly;
+        let displayInterval = 'mo';
+        if (currentBillingInterval === 'yearly' && !isFree && parseFloat(p.price_yearly) > 0) {
+            displayPrice = Math.round(parseFloat(p.price_yearly) / 12); // Show monthly equivalent
+            displayInterval = 'mo, billed yearly';
+        }
+
+        const priceHtml = isFree
+            ? 'Free'
+            : `\$${parseFloat(displayPrice).toFixed(0)}<span class="interval">/${displayInterval}</span>`;
+            
+        const yearlySaving = parseFloat(p.price_yearly) > 0
+            ? Math.round((1 - (parseFloat(p.price_yearly) / (parseFloat(p.price_monthly) * 12))) * 100)
+            : 0;
 
             return `
             <div class="pricing-card${isPopular ? ' popular' : ''}" style="padding:1.5rem;position:relative;${isCurrent ? 'border-color:var(--accent-color);' : ''}">
@@ -283,16 +335,11 @@ async function loadDynamicPlans(currentUserPlan) {
                 <div style="margin-top:1.25rem;">
                     ${isCurrent
                         ? '<div style="text-align:center;font-size:0.8rem;color:#10b981;font-weight:700;">\u2713 Active Plan</div>'
-                        : `<button class="btn btn-${isFree ? 'outline' : 'primary'} w-100" style="font-size:0.85rem;" onclick="${isFree ? '' : `checkoutPlan('${p.code}', 'monthly')`}">Upgrade</button>`
+                        : `<button class="btn btn-${isFree ? 'outline' : 'primary'} w-100" style="font-size:0.85rem;" onclick="${isFree ? '' : `checkoutPlan('${p.code}', '${currentBillingInterval}')`}">Upgrade</button>`
                     }
                 </div>
             </div>`;
-        }).join('');
-
-    } catch (err) {
-        console.error('Failed to load plans:', err);
-        if (grid) grid.innerHTML = '<div style="text-align:center;padding:3rem;color:#ef4444;">Could not load plans. Please refresh.</div>';
-    }
+    }).join('');
 }
 
 async function checkoutPlan(planCode, interval) {

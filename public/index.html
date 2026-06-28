@@ -316,10 +316,24 @@
 
             <!-- Tab: Pricing (Dynamic) -->
             <div id="tab-pricing" class="dash-tab" style="display: none;">
-                <div class="dashboard-header">
+                <div class="dashboard-header" style="margin-bottom: 1rem;">
                     <h2>Plans & Pricing</h2>
                     <p class="text-muted">Choose the plan that fits your usage.</p>
                 </div>
+                
+                <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+                    <span id="billing-monthly-label" style="font-weight: 700; color: #1e293b; transition: 0.3s;">Monthly</span>
+                    <label style="position: relative; display: inline-block; width: 50px; height: 26px;">
+                        <input type="checkbox" id="billing-interval-toggle" style="opacity: 0; width: 0; height: 0;" onchange="toggleBilling()">
+                        <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e2e8f0; transition: .4s; border-radius: 34px;">
+                            <span id="billing-slider" style="position: absolute; content: ''; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></span>
+                        </span>
+                    </label>
+                    <span id="billing-yearly-label" style="font-weight: 500; color: #94a3b8; transition: 0.3s;">
+                        Yearly <span style="color: #10b981; font-size: 0.75rem; font-weight: 700; background: #d1fae5; padding: 2px 6px; border-radius: 12px; margin-left: 4px;">Save up to 17%</span>
+                    </span>
+                </div>
+
                 <div id="pricing-grid" class="pricing-grid" style="gap: 1.25rem;">
                     <!-- Plans loaded dynamically from API -->
                     <div style="grid-column: 1/-1; text-align:center; padding:3rem; color:#94a3b8;">Loading plans…</div>
@@ -672,6 +686,6 @@
     </div>
 
 
-    <script src="/js/app.js?v=2.0.3"></script>
+    <script src="/js/app.js?v=2.0.4"></script>
 </body>
 </html>

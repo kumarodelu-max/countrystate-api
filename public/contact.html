@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - CountryState API</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .contact-container {
+            max-width: 600px;
+            margin: 4rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-family: inherit;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        #contactStatus {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 6px;
+            display: none;
+        }
+        .status-success { background: #d1fae5; color: #065f46; }
+        .status-error { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body>
+    <header class="navbar">
+        <a href="/" class="logo">📍 CountryState<span class="text-accent">API</span></a>
+        <nav class="nav-links">
+            <a href="/">Home</a>
+            <a href="/pricing.html">Pricing</a>
+            <a href="/contact.html" class="active">Contact Us</a>
+            <button class="btn btn-outline" onclick="window.location.href='/'">Go to Dashboard</button>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="contact-container">
+            <h1 style="margin-bottom: 1rem; text-align: center;">Get in Touch</h1>
+            <p style="text-align: center; color: var(--text-light); margin-bottom: 2rem;">Have a question, feature request, or need support? We'd love to hear from you.</p>
+            
+            <form id="contactForm">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea id="message" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary w-100" id="submitBtn">Send Message</button>
+                <div id="contactStatus"></div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-content">
+            <p>&copy; 2026 CountryState API. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="/contact.html">Contact Us</a>
+                <a href="/terms.html">Terms of Service</a>
+                <a href="/privacy.html">Privacy Policy</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const status = document.getElementById('contactStatus');
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+            status.style.display = 'none';
+
+            try {
+                const res = await fetch('/api/v1/contact', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, message })
+                });
+                const data = await res.json();
+                
+                status.style.display = 'block';
+                if (res.ok) {
+                    status.className = 'status-success';
+                    status.textContent = data.message;
+                    document.getElementById('contactForm').reset();
+                } else {
+                    status.className = 'status-error';
+                    status.textContent = data.message || 'An error occurred.';
+                }
+            } catch (err) {
+                status.style.display = 'block';
+                status.className = 'status-error';
+                status.textContent = 'Failed to connect to the server.';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Send Message';
+            }
+        });
+    </script>
+</body>
+</html>

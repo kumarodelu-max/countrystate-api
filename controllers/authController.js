@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto');
 const db = require('../config/db');
-const { sendVerificationEmail, sendPasswordResetEmail } = require('../utils/email');
+const { sendVerificationEmail, sendPasswordResetEmail, sendAdminNewUserAlert } = require('../utils/email');
 
 /**
  * Verify Cloudflare Turnstile Token
@@ -129,7 +129,7 @@ const login = async (req, res) => {
 
     try {
         const result = await db.query(
-            'SELECT id, email, password_hash, full_name, plan, currency, role, is_active, is_verified FROM users WHERE email = $1',
+            'SELECT id, email, password_hash, full_name, plan, currency, role, is_active, is_verified, email_unsubscribed FROM users WHERE email = $1',
             [email.toLowerCase()]
         );
 
@@ -174,6 +174,7 @@ const login = async (req, res) => {
                 plan: user.plan,
                 role: user.role,
                 currency: user.currency,
+                email_unsubscribed: user.email_unsubscribed,
                 api_keys: keysResult.rows,
             },
         });
@@ -206,6 +207,9 @@ const verifyEmail = async (req, res) => {
             'UPDATE users SET is_verified = TRUE, verification_token = NULL WHERE id = $1',
             [user.id]
         );
+        
+        // Notify admin of new verified user
+        await sendAdminNewUserAlert(user.email, user.full_name || 'Developer');
 
         // Fetch user's active API keys to return payload for auto-login
         const keysResult = await db.query(
@@ -460,7 +464,35 @@ const resetPassword = async (req, res) => {
         res.json({ status: 'success', message: 'Password has been successfully reset. You may now log in.' });
     } catch (err) {
         console.error('[Auth] Reset password error:', err);
-        res.status(500).json({ status: 'error', message: 'Internal server error.' });
+        res.status(500).json({ status: 'error', message: 'Failed to reset password. Please try again.' });
+    }
+};
+
+// ─────────────────────────────────────────────────────
+// GET /api/v1/users/unsubscribe
+// ─────────────────────────────────────────────────────
+const unsubscribeEmail = async (req, res) => {
+    const { email } = req.query;
+    if (!email) return res.status(400).send('Email required');
+    try {
+        await db.query('UPDATE users SET email_unsubscribed = TRUE WHERE email = $1', [email.toLowerCase()]);
+        res.send('<html><body style="font-family:sans-serif;text-align:center;padding:50px;"><h2>You have been successfully unsubscribed.</h2><p>You will no longer receive marketing or check-in emails.</p></body></html>');
+    } catch (e) {
+        res.status(500).send('An error occurred.');
+    }
+};
+
+// ─────────────────────────────────────────────────────
+// POST /api/v1/users/toggle-subscription
+// ─────────────────────────────────────────────────────
+const toggleSubscription = async (req, res) => {
+    const { is_unsubscribed } = req.body;
+    if (typeof is_unsubscribed !== 'boolean') return res.status(400).json({ status: 'error', message: 'Invalid payload' });
+    try {
+        await db.query('UPDATE users SET email_unsubscribed = $1 WHERE id = $2', [is_unsubscribed, req.userId]);
+        res.json({ status: 'success', message: 'Email preferences updated.' });
+    } catch (err) {
+        res.status(500).json({ status: 'error', message: 'Failed to update preferences.' });
     }
 };
 
@@ -475,5 +507,7 @@ module.exports = {
     getPublicPlans,
     getMe,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    unsubscribeEmail,
+    toggleSubscription
 };

@@ -173,8 +173,15 @@ function populateDashboard(user) {
     const welcomeName = document.getElementById('dash-welcome-name');
     if (welcomeName) welcomeName.textContent = fullName;
     
-    document.getElementById('settings-input-name').value = user.full_name || fullName;
-    document.getElementById('settings-input-email').value = user.email || '';
+    // Populate Settings
+    const settingsNameInput = document.getElementById('settings-input-name');
+    if (settingsNameInput) settingsNameInput.value = user.full_name || '';
+    const settingsEmailInput = document.getElementById('settings-input-email');
+    if (settingsEmailInput) settingsEmailInput.value = user.email || '';
+    
+    const emailUpdatesToggle = document.getElementById('settings-email-updates');
+    if (emailUpdatesToggle) emailUpdatesToggle.checked = !user.email_unsubscribed;
+
     document.getElementById('settings-initial').textContent = fullName.charAt(0).toUpperCase();
     document.getElementById('settings-name').textContent = fullName;
     document.getElementById('settings-email').textContent = user.email;
@@ -595,8 +602,33 @@ async function handleForgotPassword(e) {
     } catch (e) {
         err.textContent = 'Network error. Please try again.';
     }
-    btn.textContent = 'Send Reset Link';
-    btn.disabled = false;
+}
+
+async function toggleEmailSubscription(checkbox) {
+    const user = JSON.parse(localStorage.getItem('cs_user'));
+    if (!user || !user.api_key) return;
+
+    try {
+        const res = await fetch('/api/auth/toggle-subscription', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${user.api_key}`
+            },
+            body: JSON.stringify({ is_unsubscribed: !checkbox.checked })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+            user.email_unsubscribed = !checkbox.checked;
+            localStorage.setItem('cs_user', JSON.stringify(user));
+        } else {
+            checkbox.checked = !checkbox.checked; // Revert on failure
+            alert(data.message || 'Failed to update preferences.');
+        }
+    } catch (err) {
+        checkbox.checked = !checkbox.checked; // Revert on failure
+        console.error('Network error', err);
+    }
 }
 
 async function handleResetPassword(e) {

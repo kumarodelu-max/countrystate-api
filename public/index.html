@@ -59,6 +59,7 @@
         <div class="nav-container">
             <a href="#" class="logo">📍 CountryState<span class="text-accent">API</span></a>
             <div class="nav-auth" id="nav-auth">
+                <a href="/contact.html" style="color: var(--text-color); margin-right: 1.5rem; text-decoration: none; font-weight: 500;">Contact Us</a>
                 <button class="btn btn-outline" onclick="openModal('loginModal')">Sign In</button>
                 <button class="btn btn-primary" onclick="openModal('registerModal')">Get Free API Key</button>
             </div>
@@ -376,10 +377,10 @@
                             </div>
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <div>
-                                    <strong style="display:block; font-size:0.875rem;">Service Updates</strong>
-                                    <span class="text-sm text-muted">New features and releases</span>
+                                    <strong style="display:block; font-size:0.875rem;">Email Notifications</strong>
+                                    <span class="text-sm text-muted">Occasional check-ins and updates</span>
                                 </div>
-                                <label class="switch"><input type="checkbox" id="settings-alert-updates" checked><span class="slider round"></span></label>
+                                <label class="switch"><input type="checkbox" id="settings-email-updates" onchange="toggleEmailSubscription(this)"><span class="slider round"></span></label>
                             </div>
                         </div>
 
@@ -472,10 +473,11 @@
     </main>
 
     <!-- Footer -->
-        <footer class="site-footer">
+    <footer class="site-footer">
         <div class="footer-content">
             <p>&copy; 2026 CountryState API. All rights reserved.</p>
             <div class="footer-links">
+                <a href="/contact.html">Contact Us</a>
                 <a href="/terms.html">Terms of Service</a>
                 <a href="/privacy.html">Privacy Policy</a>
             </div>

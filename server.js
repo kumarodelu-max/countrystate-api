@@ -3,6 +3,7 @@ const express = require('express');
 const path    = require('path');
 const cors    = require('cors');
 const helmet  = require('helmet');
+const { startEmailJobs } = require('./cron/emailJobs');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -39,6 +40,7 @@ app.get('/api/health', (req, res) => {
 // ─── Routes ───────────────────────────────────────────
 app.use('/api/auth',  require('./routes/auth'));
 app.use('/api/v1',    require('./routes/geo'));
+app.use('/api/v1/contact', require('./routes/contact'));
 app.use('/api/admin', require('./routes/admin'));
 
 // ─── 404 Handler ──────────────────────────────────────
@@ -63,4 +65,7 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
     console.log(`✅ CountryState API running on http://localhost:${PORT}`);
     console.log(`   Health check: http://localhost:${PORT}/api/health`);
+    
+    // Start automated email jobs
+    startEmailJobs();
 });

@@ -127,4 +127,120 @@ async function sendPromoEmail(toEmail, promoMessage) {
     }
 }
 
-module.exports = { sendVerificationEmail, sendPasswordResetEmail, sendPromoEmail };
+/**
+ * Send Admin Alert on New Registration
+ */
+async function sendAdminNewUserAlert(userEmail, fullName) {
+    if (!SMTP_USER) return;
+    
+    const mailOptions = {
+        from: `"CountryStateAPI System" <${SMTP_USER}>`,
+        to: 'kumar.odelu@gmail.com',
+        subject: `New User Registration: ${fullName}`,
+        html: `
+            <div style="font-family: Arial, sans-serif; padding: 20px;">
+                <h3 style="color: #0f766e;">New API Developer Registered</h3>
+                <p><strong>Name:</strong> ${fullName}</p>
+                <p><strong>Email:</strong> ${userEmail}</p>
+                <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
+            </div>
+        `,
+    };
+    try { await transporter.sendMail(mailOptions); } catch (e) { console.error(e); }
+}
+
+/**
+ * Send Admin Alert for Contact Us Query
+ */
+async function sendAdminContactMessage(name, userEmail, message) {
+    if (!SMTP_USER) return;
+    
+    const mailOptions = {
+        from: `"CountryStateAPI Contact Form" <${SMTP_USER}>`,
+        to: 'kumar.odelu@gmail.com',
+        subject: `New Support Query from ${name}`,
+        html: `
+            <div style="font-family: Arial, sans-serif; padding: 20px;">
+                <h3 style="color: #ea580c;">New Message from Contact Form</h3>
+                <p><strong>From:</strong> ${name} (${userEmail})</p>
+                <hr style="border:1px solid #eee; margin:20px 0;"/>
+                <p style="white-space: pre-wrap;">${message}</p>
+            </div>
+        `,
+    };
+    try { await transporter.sendMail(mailOptions); } catch (e) { console.error(e); }
+}
+
+/**
+ * Send Follow-up Check-in Email
+ */
+async function sendFollowUpEmail(toEmail, fullName) {
+    if (!SMTP_USER) return;
+    const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
+    const unsubUrl = `${baseUrl}/api/v1/users/unsubscribe?email=${encodeURIComponent(toEmail)}`;
+    
+    const mailOptions = {
+        from: `"CountryStateAPI Support" <${SMTP_USER}>`,
+        to: toEmail,
+        subject: 'Getting started with CountryState API',
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                <p>Hi ${fullName},</p>
+                <p>Welcome to CountryState API! We are checking in to ensure you have everything you need to successfully integrate our geographical data into your application.</p>
+                <p>If you require any technical assistance, have questions about our endpoints, or need help reviewing the documentation, our support team is here for you.</p>
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="${baseUrl}/contact.html" style="background-color: #ea580c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Contact Support</a>
+                </div>
+                <p>Best regards,<br>The CountryState API Team</p>
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+                <p style="font-size: 11px; color: #999; text-align: center;">
+                    You are receiving this email because you registered for a developer account. 
+                    <br><a href="${unsubUrl}" style="color: #999;">Unsubscribe from notification emails</a>
+                </p>
+            </div>
+        `,
+    };
+    try { await transporter.sendMail(mailOptions); } catch (e) { console.error(e); }
+}
+
+/**
+ * Send Rating/Feedback Email to Active Users
+ */
+async function sendRatingEmail(toEmail, fullName) {
+    if (!SMTP_USER) return;
+    const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
+    const unsubUrl = `${baseUrl}/api/v1/users/unsubscribe?email=${encodeURIComponent(toEmail)}`;
+    
+    const mailOptions = {
+        from: `"CountryStateAPI Team" <${SMTP_USER}>`,
+        to: toEmail,
+        subject: 'How is your experience with CountryState API?',
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                <p>Hi ${fullName},</p>
+                <p>We hope your application integration is going smoothly! We strive to provide the fastest and most reliable geographical data API available.</p>
+                <p>As a valued developer on our platform, your feedback is incredibly important to us. If you have a moment, we would love to hear your thoughts, feature requests, or a quick rating on your experience so far.</p>
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="${baseUrl}/contact.html" style="background-color: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Share Feedback</a>
+                </div>
+                <p>Thank you for building with us!<br>The CountryState API Team</p>
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+                <p style="font-size: 11px; color: #999; text-align: center;">
+                    You are receiving this email because you are an active user of our API. 
+                    <br><a href="${unsubUrl}" style="color: #999;">Unsubscribe from notification emails</a>
+                </p>
+            </div>
+        `,
+    };
+    try { await transporter.sendMail(mailOptions); } catch (e) { console.error(e); }
+}
+
+module.exports = {
+    sendVerificationEmail,
+    sendPasswordResetEmail,
+    sendPromoEmail,
+    sendAdminNewUserAlert,
+    sendAdminContactMessage,
+    sendFollowUpEmail,
+    sendRatingEmail
+};

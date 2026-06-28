@@ -39,34 +39,37 @@ function startEmailJobs() {
                 }
             }
 
-            // 3. Unverified Nudge for users registered exactly 1 week ago (168-192 hours) who never verified
-            const unverifiedUsers = await db.query(`
-                SELECT id, email, verification_token
-                FROM users
-                WHERE created_at >= NOW() - INTERVAL '192 hours'
-                  AND created_at < NOW() - INTERVAL '168 hours'
-                  AND is_verified = FALSE
-                  AND email_unsubscribed = FALSE
-            `);
+            // --- MONDAY ONLY JOBS ---
+            if (new Date().getDay() === 1) { // 1 = Monday
+                console.log('[Cron] It is Monday! Running weekly inactive user nudges...');
+                
+                // 3. Unverified Nudge for users registered in the last 7 days who never verified
+                const unverifiedUsers = await db.query(`
+                    SELECT id, email, verification_token
+                    FROM users
+                    WHERE created_at >= NOW() - INTERVAL '7 days'
+                      AND is_verified = FALSE
+                      AND email_unsubscribed = FALSE
+                `);
 
-            for (const user of unverifiedUsers.rows) {
-                await sendUnverifiedNudgeEmail(user.email, user.verification_token);
-            }
+                for (const user of unverifiedUsers.rows) {
+                    await sendUnverifiedNudgeEmail(user.email, user.verification_token);
+                }
 
-            // 4. Inactive Help for verified users registered exactly 1 week ago (168-192 hours) with 0 api calls
-            const zeroCallUsers = await db.query(`
-                SELECT u.id, u.email, u.full_name, u.email_unsubscribed,
-                       (SELECT COUNT(*) FROM api_logs al WHERE al.user_id = u.id) as api_count
-                FROM users u
-                WHERE u.created_at >= NOW() - INTERVAL '192 hours'
-                  AND u.created_at < NOW() - INTERVAL '168 hours'
-                  AND u.is_verified = TRUE
-                  AND u.email_unsubscribed = FALSE
-            `);
+                // 4. Inactive Help for verified users registered in the last 7 days with 0 api calls
+                const zeroCallUsers = await db.query(`
+                    SELECT u.id, u.email, u.full_name, u.email_unsubscribed,
+                           (SELECT COUNT(*) FROM api_logs al WHERE al.user_id = u.id) as api_count
+                    FROM users u
+                    WHERE u.created_at >= NOW() - INTERVAL '7 days'
+                      AND u.is_verified = TRUE
+                      AND u.email_unsubscribed = FALSE
+                `);
 
-            for (const user of zeroCallUsers.rows) {
-                if (parseInt(user.api_count) === 0) {
-                    await sendInactiveHelpEmail(user.email, user.full_name || 'Developer');
+                for (const user of zeroCallUsers.rows) {
+                    if (parseInt(user.api_count) === 0) {
+                        await sendInactiveHelpEmail(user.email, user.full_name || 'Developer');
+                    }
                 }
             }
             

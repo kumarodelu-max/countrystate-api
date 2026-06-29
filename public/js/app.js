@@ -306,36 +306,51 @@ function renderPricingGrid(plans, currentUserPlan) {
         const isPopular = i === midIdx && plans.length > 2;
         const isCurrent = p.code === currentUserPlan;
         
-        let displayPrice = p.price_monthly;
+        let currencySymbol = userCurrency === 'INR' ? '₹' : '$';
+        
+        let priceMonthlyNum = parseFloat(p.price_monthly);
+        let priceYearlyNum = parseFloat(p.price_yearly);
+        
+        if (userCurrency === 'INR' && !isFree) {
+            // Rough conversion mapping for demo
+            const mapUSDToINR = { 9: 750, 19: 1600, 49: 4100, 99: 8300, 999: 83000, 199: 16600, 499: 41500 };
+            priceMonthlyNum = mapUSDToINR[priceMonthlyNum] || (priceMonthlyNum * 83.5);
+            priceYearlyNum = mapUSDToINR[priceYearlyNum] || (priceYearlyNum * 83.5);
+        }
+        
+        let displayPrice = priceMonthlyNum;
         let displayInterval = 'mo';
-        if (currentBillingInterval === 'yearly' && !isFree && parseFloat(p.price_yearly) > 0) {
-            displayPrice = Math.round(parseFloat(p.price_yearly) / 12); // Show monthly equivalent
+        if (currentBillingInterval === 'yearly' && !isFree && priceYearlyNum > 0) {
+            displayPrice = Math.round(priceYearlyNum / 12); // Show monthly equivalent
             displayInterval = 'mo, billed yearly';
         }
 
         const priceHtml = isFree
             ? 'Free'
-            : `\$${parseFloat(displayPrice).toFixed(0)}<span class="interval">/${displayInterval}</span>`;
+            : `${currencySymbol}${parseFloat(displayPrice).toFixed(0)}<span class="interval">/${displayInterval}</span>`;
             
-        const yearlySaving = parseFloat(p.price_yearly) > 0
-            ? Math.round((1 - (parseFloat(p.price_yearly) / (parseFloat(p.price_monthly) * 12))) * 100)
+        const yearlySaving = priceYearlyNum > 0
+            ? Math.round((1 - (priceYearlyNum / (priceMonthlyNum * 12))) * 100)
             : 0;
+            
+        const translatedPlanName = (i18nDict[currentLang] && i18nDict[currentLang][`plan_${p.code}`]) || p.name;
+        const translatedBtn = (i18nDict[currentLang] && i18nDict[currentLang]['btn_upgrade']) || 'Upgrade';
 
-            return `
+        return `
             <div class="pricing-card${isPopular ? ' popular' : ''}" style="padding:1.5rem;position:relative;${isCurrent ? 'border-color:var(--accent-color);' : ''}">
                 ${isPopular ? '<div class="popular-badge" style="font-size:0.7rem;top:-10px;">Popular</div>' : ''}
                 ${isCurrent ? '<div style="position:absolute;top:10px;right:12px;background:#10b981;color:white;font-size:0.65rem;font-weight:700;padding:0.2rem 0.5rem;border-radius:1rem;">Your Plan</div>' : ''}
-                <h3 style="font-size:1.15rem;margin:0 0 0.5rem;">${p.name}</h3>
+                <h3 style="font-size:1.15rem;margin:0 0 0.5rem;">${translatedPlanName}</h3>
                 <div class="price" style="font-size:2rem;font-weight:800;margin-bottom:1rem;">${priceHtml}</div>
                 <div style="display:flex;flex-direction:column;gap:0.4rem;">
                     <p class="text-sm" style="margin:0;">\uD83D\uDCC5 Monthly: <strong>${parseInt(p.monthly_limit).toLocaleString()}</strong></p>
                     <p class="text-sm" style="margin:0;">\u26A1 Daily: <strong>${parseInt(p.daily_limit).toLocaleString()}</strong></p>
-                    ${parseFloat(p.price_yearly) > 0 && yearlySaving > 0 ? `<p class="text-sm" style="margin:0;color:#10b981;">\uD83D\uDCB0 \$${parseFloat(p.price_yearly).toFixed(0)}/yr (save ${yearlySaving}%)</p>` : ''}
+                    ${priceYearlyNum > 0 && yearlySaving > 0 ? `<p class="text-sm" style="margin:0;color:#10b981;">\uD83D\uDCB0 ${currencySymbol}${parseFloat(priceYearlyNum).toFixed(0)}/yr (save ${yearlySaving}%)</p>` : ''}
                 </div>
                 <div style="margin-top:1.25rem;">
                     ${isCurrent
                         ? '<div style="text-align:center;font-size:0.8rem;color:#10b981;font-weight:700;">\u2713 Active Plan</div>'
-                        : `<button class="btn btn-${isFree ? 'outline' : 'primary'} w-100" style="font-size:0.85rem;" onclick="${isFree ? '' : `checkoutPlan('${p.code}', '${currentBillingInterval}')`}">Upgrade</button>`
+                        : `<button class="btn btn-${isFree ? 'outline' : 'primary'} w-100" style="font-size:0.85rem;" onclick="${isFree ? '' : `checkoutPlan('${p.code}', '${currentBillingInterval}')`}">${translatedBtn}</button>`
                     }
                 </div>
             </div>`;
@@ -895,3 +910,129 @@ async function handleSupportSubmit(e) {
     btn.disabled = false;
     btn.textContent = 'Send Message';
 }
+
+// ==========================================
+// i18n & IP Geolocation Engine
+// ==========================================
+
+const i18nDict = {
+    'en': {
+        'hero_badge': '🚀 Now live with 150,000+ cities',
+        'hero_title_1': 'The Most Accurate ',
+        'hero_title_2': 'Geo Data API',
+        'hero_title_3': ' for Developers',
+        'hero_subtitle': 'Lightning-fast REST API for Countries, States, and Cities. Complete worldwide coverage in JSON format. Multilingual support built-in.',
+        'btn_start_free': 'Start Building for Free',
+        'btn_view_features': 'View Features',
+        'nav_contact': 'Contact Us',
+        'nav_signin': 'Sign In',
+        'nav_get_key': 'Get Free API Key',
+        'pricing_title': 'Simple, Transparent Pricing',
+        'pricing_subtitle': 'Choose the plan that fits your needs. No hidden fees.',
+        'plan_starter': 'Starter',
+        'plan_supporter': 'Supporter',
+        'plan_pro': 'Professional',
+        'plan_business': 'Business',
+        'btn_upgrade': 'Upgrade'
+    },
+    'hi': {
+        'hero_badge': '🚀 अब 150,000+ शहरों के साथ लाइव',
+        'hero_title_1': 'डेवलपर्स के लिए सबसे सटीक ',
+        'hero_title_2': 'जियो डेटा API',
+        'hero_title_3': '',
+        'hero_subtitle': 'देशों, राज्यों और शहरों के लिए बिजली की तरह तेज़ REST API। JSON प्रारूप में संपूर्ण विश्वव्यापी कवरेज। बहुभाषी समर्थन अंतर्निहित।',
+        'btn_start_free': 'मुफ्त में निर्माण शुरू करें',
+        'btn_view_features': 'सुविधाएँ देखें',
+        'nav_contact': 'संपर्क करें',
+        'nav_signin': 'साइन इन करें',
+        'nav_get_key': 'मुफ्त API कुंजी प्राप्त करें',
+        'pricing_title': 'सरल, पारदर्शी मूल्य निर्धारण',
+        'pricing_subtitle': 'वह योजना चुनें जो आपकी आवश्यकताओं के अनुरूप हो। कोई छिपी हुई फीस नहीं।',
+        'plan_starter': 'शुरुआती',
+        'plan_supporter': 'समर्थक',
+        'plan_pro': 'पेशेवर',
+        'plan_business': 'व्यापार',
+        'btn_upgrade': 'अपग्रेड करें'
+    }
+};
+
+let currentLang = localStorage.getItem('cs_lang') || 'en';
+let userCurrency = 'USD'; // Default
+
+function setLanguage(lang) {
+    if (!i18nDict[lang]) return;
+    currentLang = lang;
+    localStorage.setItem('cs_lang', lang);
+    applyTranslations();
+}
+
+function applyTranslations() {
+    const elements = document.querySelectorAll('[data-i18n]');
+    elements.forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (i18nDict[currentLang] && i18nDict[currentLang][key]) {
+            el.textContent = i18nDict[currentLang][key];
+        }
+    });
+}
+
+async function detectIPAndLocalize() {
+    try {
+        const res = await fetch('https://ipapi.co/json/');
+        const data = await res.json();
+        
+        if (data && data.country_code === 'IN') {
+            userCurrency = 'INR';
+            updatePricingDisplay('INR');
+        } else {
+            userCurrency = 'USD';
+            updatePricingDisplay('USD');
+        }
+    } catch(e) {
+        console.error('IP Geolocation failed:', e);
+        // Fallback to USD
+        updatePricingDisplay('USD');
+    }
+}
+
+function updatePricingDisplay(currency) {
+    const isYearly = document.getElementById('billing-toggle') && document.getElementById('billing-toggle').checked;
+    
+    const prices = {
+        'USD': {
+            'monthly': { starter: '$9', supporter: '$19', professional: '$49', business: '$99' },
+            'yearly': { starter: '$99', supporter: '$199', professional: '$499', business: '$999' }
+        },
+        'INR': {
+            'monthly': { starter: '₹750', supporter: '₹1,600', professional: '₹4,100', business: '₹8,300' },
+            'yearly': { starter: '₹8,300', supporter: '₹16,600', professional: '₹41,500', business: '₹83,000' }
+        }
+    };
+    
+    const term = isYearly ? 'yearly' : 'monthly';
+    const activePrices = prices[currency][term];
+    
+    const updateEl = (id, val) => {
+        const el = document.getElementById(id);
+        if(el) el.textContent = val;
+    };
+    
+    updateEl('price-starter', activePrices.starter);
+    updateEl('price-supporter', activePrices.supporter);
+    updateEl('price-pro', activePrices.professional);
+    updateEl('price-business', activePrices.business);
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', () => {
+    applyTranslations();
+    detectIPAndLocalize();
+    
+    // Hook into billing toggle if it exists
+    const toggle = document.getElementById('billing-toggle');
+    if (toggle) {
+        toggle.addEventListener('change', () => {
+            updatePricingDisplay(userCurrency);
+        });
+    }
+});

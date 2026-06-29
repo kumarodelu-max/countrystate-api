@@ -59,9 +59,13 @@
         <div class="nav-container">
             <a href="#" class="logo">📍 CountryState<span class="text-accent">API</span></a>
             <div class="nav-auth" id="nav-auth">
-                <a href="/contact.html" style="color: var(--text-color); margin-right: 1.5rem; text-decoration: none; font-weight: 500;">Contact Us</a>
-                <button class="btn btn-outline" onclick="openModal('loginModal')">Sign In</button>
-                <button class="btn btn-primary" onclick="openModal('registerModal')">Get Free API Key</button>
+                <select id="lang-selector" onchange="setLanguage(this.value)" style="margin-right: 1.5rem; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color); font-family: 'Inter', sans-serif;">
+                    <option value="en">English</option>
+                    <option value="hi">हिंदी (Hindi)</option>
+                </select>
+                <a href="/contact.html" style="color: var(--text-color); margin-right: 1.5rem; text-decoration: none; font-weight: 500;" data-i18n="nav_contact">Contact Us</a>
+                <button class="btn btn-outline" onclick="openModal('loginModal')" data-i18n="nav_signin">Sign In</button>
+                <button class="btn btn-primary" onclick="openModal('registerModal')" data-i18n="nav_get_key">Get Free API Key</button>
             </div>
         </div>
     </nav>
@@ -71,12 +75,12 @@
         <!-- Hero Section -->
         <section class="hero">
             <div class="hero-content">
-                <div class="badge">🚀 Now live with 150,000+ cities</div>
-                <h1>The Most Accurate <br><span class="text-gradient">Geo Data API</span> for Developers</h1>
-                <p>Lightning-fast REST API for Countries, States, and Cities. Complete worldwide coverage in JSON format. Multilingual support built-in.</p>
+                <div class="badge" data-i18n="hero_badge">🚀 Now live with 150,000+ cities</div>
+                <h1><span data-i18n="hero_title_1">The Most Accurate </span><br><span class="text-gradient" data-i18n="hero_title_2">Geo Data API</span><span data-i18n="hero_title_3"> for Developers</span></h1>
+                <p data-i18n="hero_subtitle">Lightning-fast REST API for Countries, States, and Cities. Complete worldwide coverage in JSON format. Multilingual support built-in.</p>
                 <div class="hero-actions">
-                    <button class="btn btn-primary btn-large" onclick="openModal('registerModal')">Start Building for Free</button>
-                    <a href="#features" class="btn btn-outline btn-large">View Features</a>
+                    <button class="btn btn-primary btn-large" onclick="openModal('registerModal')" data-i18n="btn_start_free">Start Building for Free</button>
+                    <a href="#features" class="btn btn-outline btn-large" data-i18n="btn_view_features">View Features</a>
                 </div>
             </div>
             <div class="hero-visual">
@@ -687,6 +691,6 @@
 
     <!-- Razorpay Checkout SDK -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script src="/js/app.js?v=3.0.1"></script>
+    <script src="/js/app.js?v=3.0.2"></script>
 </body>
 </html>

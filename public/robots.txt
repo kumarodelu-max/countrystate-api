@@ -11,4 +11,4 @@ Allow: /
 User-agent: Google-Extended
 Allow: /
 
-Sitemap: https://countrystate.in/sitemap.xml
+Sitemap: https://countrystatecityapp.in/sitemap.xml

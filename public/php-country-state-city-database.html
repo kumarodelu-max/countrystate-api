@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHP Country State City Database & REST API</title>
+    <meta name="description" content="Replace outdated SQL dumps in your PHP or Laravel application with our real-time Country State City REST API. Always accurate, zero maintenance.">
+    <meta name="keywords" content="php country state city database, laravel country state city, sql dump countries, php geographical api">
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="light-mode">
+    <div class="landing-container" style="max-width: 800px; margin: 0 auto; padding: 4rem 2rem; text-align: center;">
+        <h1 style="font-size: 3rem; margin-bottom: 1rem; color: var(--accent-color);">PHP Country State City Database API</h1>
+        <p style="font-size: 1.25rem; color: var(--text-muted); margin-bottom: 3rem;">
+            Stop downloading outdated SQL database dumps for your PHP or Laravel app. Fetch real-time geographical data instantly via our REST API.
+        </p>
+        
+        <div style="background: var(--card-bg); border: 1px solid var(--border-color); padding: 2rem; border-radius: 12px; margin-bottom: 3rem; text-align: left;">
+            <h3 style="margin-bottom: 1rem;">PHP cURL Example</h3>
+            <pre style="background: #1e1e1e; color: #a5b4fc; padding: 1.5rem; border-radius: 8px; overflow-x: auto;"><code>$ch = curl_init('https://countrystatecityapp.in/api/v1/countries');
+curl_setopt($ch, CURLOPT_HTTPHEADER, array('Authorization: Bearer YOUR_KEY'));
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+$response = curl_exec($ch);
+curl_close($ch);
+$data = json_decode($response, true);</code></pre>
+        </div>
+
+        <a href="/" class="btn btn-primary" style="font-size: 1.25rem; padding: 1rem 2rem;">Get Your Free API Key Now</a>
+    </div>
+</body>
+</html>

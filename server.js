@@ -32,7 +32,7 @@ app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 
 // Serve frontend website
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 
 // ─── Health Check ─────────────────────────────────────
 app.get('/api/health', (req, res) => {

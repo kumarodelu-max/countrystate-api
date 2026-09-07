@@ -1036,3 +1036,62 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// ==========================================
+// Interactive API Playground Logic
+// ==========================================
+async function runPlaygroundRequest() {
+    const endpoint = document.getElementById('pg-endpoint').value;
+    const responseEl = document.getElementById('pg-response');
+    const statusEl = document.getElementById('pg-status');
+    const btn = document.querySelector('.playground-container button');
+    
+    // Check if logged in
+    const userStr = localStorage.getItem('cs_user');
+    if (!userStr) {
+        responseEl.textContent = 'Error: You must be logged in to test the API.';
+        responseEl.style.color = '#ef4444';
+        return;
+    }
+    
+    const user = JSON.parse(userStr);
+    const apiKey = user.api_keys && user.api_keys.length > 0 ? user.api_keys[0].key_value : user.api_key;
+    
+    if (!apiKey) {
+        responseEl.textContent = 'Error: No active API key found on your account.';
+        responseEl.style.color = '#ef4444';
+        return;
+    }
+    
+    btn.disabled = true;
+    btn.textContent = 'Loading...';
+    responseEl.style.color = '#a5b4fc';
+    responseEl.textContent = 'Fetching data...';
+    statusEl.textContent = '';
+    
+    try {
+        const start = performance.now();
+        const res = await fetch(endpoint, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`
+            }
+        });
+        const end = performance.now();
+        const data = await res.json();
+        
+        statusEl.textContent = `${res.status} OK • ${Math.round(end - start)}ms`;
+        statusEl.style.color = res.ok ? '#10b981' : '#ef4444';
+        
+        responseEl.textContent = JSON.stringify(data, null, 2);
+        
+    } catch (e) {
+        statusEl.textContent = 'Failed';
+        statusEl.style.color = '#ef4444';
+        responseEl.textContent = 'Network Error: Could not connect to API.';
+        responseEl.style.color = '#ef4444';
+    }
+    
+    btn.disabled = false;
+    btn.textContent = 'Run Request';
+}

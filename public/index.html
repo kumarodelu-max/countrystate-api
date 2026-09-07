@@ -237,11 +237,29 @@
                         <h3 style="font-size: 1.5rem; margin-top:0.5rem; color: #10b981;">100% Uptime</h3>
                     </div>
                 </div>
-                <div class="docs-quick">
-                    <h3>Quick Start</h3>
+                <div class="playground-container mt-2" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-top: 2rem;">
+                    <h3>⚡ Interactive API Playground</h3>
+                    <p class="text-sm text-muted mb-1">Make your first API call right now using your live API key.</p>
+                    
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem; margin-bottom: 1rem;">
+                        <select id="pg-endpoint" style="flex: 1; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color);">
+                            <option value="/api/v1/countries">GET /api/v1/countries (All Countries)</option>
+                            <option value="/api/v1/countries/IN/states">GET /api/v1/countries/IN/states (States in India)</option>
+                            <option value="/api/v1/countries/US/states/NY/cities">GET /api/v1/countries/US/states/NY/cities (Cities in New York)</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="runPlaygroundRequest()">Run Request</button>
+                    </div>
+                    
                     <div class="code-window mt-1">
-                        <pre><code>curl -X GET "http://localhost:3000/api/v1/countries" \
-  -H "Authorization: Bearer YOUR_API_KEY"</code></pre>
+                        <div class="window-header" style="justify-content: space-between;">
+                            <div>
+                                <span class="dot red"></span>
+                                <span class="dot yellow"></span>
+                                <span class="dot green"></span>
+                            </div>
+                            <span id="pg-status" style="font-size: 0.75rem; font-weight: 600; color: #10b981;"></span>
+                        </div>
+                        <pre><code id="pg-response" style="color: #a5b4fc;">// Click "Run Request" to see the live JSON response here...</code></pre>
                     </div>
                 </div>
             </div>

@@ -23,8 +23,8 @@ const getUsers = async (req, res) => {
                 u.id, u.full_name, u.email, u.plan, u.role,
                 u.is_active as user_active, u.created_at, u.is_verified, u.last_login_at,
                 ak.key_value, ak.daily_limit, ak.is_active as key_active,
-                (SELECT COUNT(*) FROM api_logs al WHERE al.api_key = ak.key_value AND al.created_at >= CURRENT_DATE AND (al.status_code = 200 OR al.status_code IS NULL)) as used_today,
-                (SELECT COUNT(*) FROM api_logs al WHERE al.api_key = ak.key_value AND (al.status_code = 200 OR al.status_code IS NULL)) as total_used,
+                (SELECT COUNT(*) FROM api_logs al WHERE al.api_key = ak.key_value AND al.created_at >= CURRENT_DATE AND (al.status_code != 429 OR al.status_code IS NULL)) as used_today,
+                (SELECT COUNT(*) FROM api_logs al WHERE al.api_key = ak.key_value AND (al.status_code != 429 OR al.status_code IS NULL)) as total_used,
                 (SELECT MAX(created_at) FROM api_logs al WHERE al.api_key = ak.key_value) as last_api_use
             FROM users u
             LEFT JOIN api_keys ak ON ak.user_id = u.id
@@ -347,15 +347,15 @@ const getUserLogs = async (req, res) => {
         const { key_value, daily_limit, full_name, email, plan } = kr.rows[0];
         const [logs, cnt, lt] = await Promise.all([
             db.query(
-                "SELECT DATE(created_at) AS day, COUNT(*)::int AS calls FROM api_logs WHERE api_key = $1 AND created_at >= NOW() - INTERVAL '" + interval + "' AND (status_code = 200 OR status_code IS NULL) GROUP BY DATE(created_at) ORDER BY DATE(created_at) DESC LIMIT $2 OFFSET $3",
+                "SELECT DATE(created_at) AS day, COUNT(*)::int AS calls FROM api_logs WHERE api_key = $1 AND created_at >= NOW() - INTERVAL '" + interval + "' AND (status_code != 429 OR status_code IS NULL) GROUP BY DATE(created_at) ORDER BY DATE(created_at) DESC LIMIT $2 OFFSET $3",
                 [key_value, limit, offset]
             ),
             db.query(
-                "SELECT COUNT(DISTINCT DATE(created_at))::int AS total FROM api_logs WHERE api_key = $1 AND created_at >= NOW() - INTERVAL '" + interval + "' AND (status_code = 200 OR status_code IS NULL)",
+                "SELECT COUNT(DISTINCT DATE(created_at))::int AS total FROM api_logs WHERE api_key = $1 AND created_at >= NOW() - INTERVAL '" + interval + "' AND (status_code != 429 OR status_code IS NULL)",
                 [key_value]
             ),
             db.query(
-                "SELECT COUNT(*)::int AS total, MIN(created_at) AS first_call, MAX(created_at) AS last_call FROM api_logs WHERE api_key = $1 AND (status_code = 200 OR status_code IS NULL)",
+                "SELECT COUNT(*)::int AS total, MIN(created_at) AS first_call, MAX(created_at) AS last_call FROM api_logs WHERE api_key = $1 AND (status_code != 429 OR status_code IS NULL)",
                 [key_value]
             )
         ]);

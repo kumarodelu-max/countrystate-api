@@ -540,25 +540,25 @@ async function fetchUserLogs(page = currentLogsPage) {
             
             const logs = data.data;
             if (!logs || !logs.length) {
-                if (tbody) tbody.innerHTML = '<tr><td colspan="4" class="empty">No API calls found for this period.</td></tr>';
+                if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="empty">No API calls found for this period.</td></tr>';
             } else if (tbody) {
                 tbody.innerHTML = logs.map(l => {
                     const dt = new Date(l.day).toLocaleDateString('en-IN', { month:'short', day:'numeric', year:'numeric', timeZone: 'UTC' });
-                    const calls = parseInt(l.calls) || 0;
+                    const totalAttempts = parseInt(l.total_attempts) || 0;
+                    const successCalls = parseInt(l.successful_calls) || 0;
+                    const failedCalls = parseInt(l.failed_calls) || 0;
+                    const ip = l.ip_address || 'Unknown';
                     const lim = parseInt(user.daily_limit) || 100;
-                    const pct = Math.min(100, Math.round((calls / lim) * 100));
-                    const color = pct >= 100 ? '#ef4444' : (pct >= 80 ? '#f59e0b' : '#3b82f6');
+                    const pct = Math.min(100, Math.round((successCalls / lim) * 100));
+                    const color = pct >= 100 ? '#ef4444' : (pct >= 80 ? '#f59e0b' : '#16a34a');
                     
                     return `
                     <tr>
                         <td data-label="Date" style="color:#0f172a; font-weight:500;">${dt}</td>
-                        <td data-label="Calls" style="font-weight:700; color:${color};">${calls.toLocaleString()}</td>
+                        <td data-label="IP Address" style="color:#64748b; font-size:0.85rem; font-family:monospace;">${ip}</td>
+                        <td data-label="Success" style="font-weight:700; color:${color};">${successCalls.toLocaleString()}</td>
+                        <td data-label="Failed" style="font-weight:700; color:#ef4444;">${failedCalls.toLocaleString()}</td>
                         <td data-label="Limit / %" style="color:#475569; font-size:0.8rem;">/ ${lim.toLocaleString()} (${pct}%)</td>
-                        <td data-label="Usage Bar" style="width:100px;">
-                            <div style="background:#e2e8f0; height:6px; border-radius:3px; overflow:hidden;">
-                                <div style="background:${color}; height:100%; width:${pct}%;"></div>
-                            </div>
-                        </td>
                     </tr>
                     `;
                 }).join('');

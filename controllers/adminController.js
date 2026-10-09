@@ -347,7 +347,7 @@ const getUserLogs = async (req, res) => {
         const { key_value, daily_limit, full_name, email, plan } = kr.rows[0];
         const [logs, cnt, lt] = await Promise.all([
             db.query(
-                "SELECT DATE(created_at) AS day, COUNT(*)::int AS calls FROM api_logs WHERE api_key = $1 AND created_at >= NOW() - INTERVAL '" + interval + "' AND (status_code != 429 OR status_code IS NULL) GROUP BY DATE(created_at) ORDER BY DATE(created_at) DESC LIMIT $2 OFFSET $3",
+                "SELECT DATE(created_at) AS day, COUNT(*)::int AS total_attempts, COUNT(CASE WHEN status_code = 200 OR status_code IS NULL THEN 1 END)::int AS successful_calls, COUNT(CASE WHEN status_code != 200 AND status_code IS NOT NULL THEN 1 END)::int AS failed_calls, MAX(ip_address) AS ip_address FROM api_logs WHERE api_key = $1 AND created_at >= NOW() - INTERVAL '" + interval + "' GROUP BY DATE(created_at) ORDER BY DATE(created_at) DESC LIMIT $2 OFFSET $3",
                 [key_value, limit, offset]
             ),
             db.query(
